@@ -1,0 +1,1133 @@
+SWEEP 2 spots
+READY v4 | difficulty=Easy | waiting for goblins
+CALL ReplicatedStorage.packages.Net.RF/Crew/GetStatueBoards:InvokeServer()
+---- UI DUMP (visible text) ----
+UI Players.uuii888877.PlayerGui.adminshower.title | "2.07.0.0.632 - 11889394255" | button=false
+UI Players.uuii888877.PlayerGui.backpack.hotbar.Folder.Frame.Open | "Touch To Open" | button=true
+UI Players.uuii888877.PlayerGui.backpack.hotbar.ItemTemplate.ItemName | "Flimsy Rod" | button=true
+UI Players.uuii888877.PlayerGui.backpack.hotbar.ItemTemplate.ItemName | "Equipment Bag" | button=true
+UI Players.uuii888877.PlayerGui.backpack.hotbar.ItemTemplate.ItemName | "Bestiary" | button=true
+UI Players.uuii888877.PlayerGui.backpack.hotbar.ItemTemplate.ItemName | "Quest Book" | button=true
+UI Players.uuii888877.PlayerGui.backpack.hotbar.ItemTemplate.ItemName | "Candy Bucket" | button=true
+UI Players.uuii888877.PlayerGui.backpack.hotbar.ItemTemplate.ItemName | "Crab Cage" | button=true
+UI Players.uuii888877.PlayerGui.backpack.hotbar.ItemTemplate.Stack | "x5" | button=true
+UI Players.uuii888877.PlayerGui.backpack.hotbar.ItemTemplate.ItemName | "Treasure Map
+Unrevealed" | button=true
+UI Players.uuii888877.PlayerGui.backpack.hotbar.ItemTemplate.ItemName | "Spider Eye" | button=true
+UI Players.uuii888877.PlayerGui.backpack.hotbar.ItemTemplate.Stack | "x3" | button=true
+UI Players.uuii888877.PlayerGui.backpack.hotbar.ItemTemplate.ItemName | "Crushed Bone" | button=true
+UI Players.uuii888877.PlayerGui.backpack.tooltip | "Tooltip! Very cool I know, I'm not sure how to mak" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.lvl | "Level 3" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.announcements.announcer.rodequipped.Main | "Equipped Rod Name Here!" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.announcements.announcer.unlocked.Main | "Unlocked Item Name Here!" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.announcements.announcer.thought.Main | "..." | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.announcements.announcer.quest.Main | "Quest Compelted!" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.announcements.announcer.thoughtbig.Main | "..." | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.announcements.announcer.catch.Main | "You just caught a Sockeye Salmon at 7.4kg!" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.announcements.announcer.popupNotif.notifContent.dismissButton | "Dismiss" | button=true
+UI Players.uuii888877.PlayerGui.hud.safezone.announcements.announcer.popupNotif.notifContent.body | "Visit Jack Marrow at Forsaken Shores to fix them." | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.announcements.announcer.popupNotif.notifContent.header | "You've reached the maximum number of Treasure Maps" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.announcements.announcer.bestiary.Main | "Bestiary: New Max Weight!" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.bodyannouncements.bodyannouncer.offer.title | "Trade Request" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.bodyannouncements.bodyannouncer.offer.question | "Nickname [@Username] is offering you 1x <>Itemname" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.bodyannouncements.bodyannouncer.offer.confirm | "[Yes]" | button=true
+UI Players.uuii888877.PlayerGui.hud.safezone.bodyannouncements.bodyannouncer.offer.deny | "[No]" | button=true
+UI Players.uuii888877.PlayerGui.hud.safezone.bodyannouncements.bodyannouncer.changelogs.title | "Changelogs" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.bodyannouncements.bodyannouncer.changelogs.confirm | "[Close]" | button=true
+UI Players.uuii888877.PlayerGui.hud.safezone.compass.Compass.SW | "SW" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.compass.Compass.SE | "SE" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.statuses.FriendBoost.Percent | "+0% XP" | button=true
+UI Players.uuii888877.PlayerGui.hud.safezone.statuses.FriendBoost.Multiplier | "Invite" | button=true
+UI Players.uuii888877.PlayerGui.hud.safezone.topannouncements.topannouncer.event.Main | "Event Has Started" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.topannouncements.topannouncer.ui.Main | "Event Has Started" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.topbar.MainMenu | "Menu" | button=true
+UI Players.uuii888877.PlayerGui.hud.safezone.topbar.ShopMenu | "Shop" | button=true
+UI Players.uuii888877.PlayerGui.hud.safezone.topbar.ShopMenu.Label | "Shop" | button=true
+UI Players.uuii888877.PlayerGui.hud.safezone.coins | "2,650 C$" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.keeperLevel | "Keeper Level: 0" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.idolLevel | "Idol Level: 0" | button=false
+UI Players.uuii888877.PlayerGui.hud.location.title | "AREA NAME" | button=false
+UI Players.uuii888877.PlayerGui.hud.deviceinset.quests.questVisualizer.lineTemplate | "[Failed to load]" | button=false
+UI Players.uuii888877.PlayerGui.hud.deviceinset.quests.questVisualizer.template.main.subtitle | "Desc" | button=false
+UI Players.uuii888877.PlayerGui.hud.deviceinset.quests.questVisualizer.template.main.title | "Quest" | button=false
+UI Players.uuii888877.PlayerGui.hud.deviceinset.quests.FriendQuest1.main.Line1 | "Catch 10 Bait Crate (0/10)" | button=false
+UI Players.uuii888877.PlayerGui.hud.deviceinset.quests.FriendQuest1.main.subtitle | "You've accepted a challenge from Marlon! Make sure" | button=false
+UI Players.uuii888877.PlayerGui.hud.deviceinset.quests.FriendQuest1.main.title | "Friend Quest: Bait Crates" | button=false
+UI Players.uuii888877.PlayerGui.TopbarStandard.Holders.Right.PlayerList.IconButton.Menu.IconSpot.Contents.IconLabelContainer.IconLabel | "three-people" | button=false
+UI Players.uuii888877.PlayerGui.PlayerList.Panel.Header.People | "People" | button=false
+UI Players.uuii888877.PlayerGui.PlayerList.Panel.List.Subhanhamdard5.NameFrame.Name.DisplayName | "SubhanHamdard5" | button=true
+UI Players.uuii888877.PlayerGui.PlayerList.Panel.List.juvj999.NameFrame.Name.DisplayName | "juvj999" | button=true
+UI Players.uuii888877.PlayerGui.PlayerList.Panel.List.am_sussydrippyalt.NameFrame.Name.DisplayName | "am_sussydrippyalt" | button=true
+UI Players.uuii888877.PlayerGui.PlayerList.Panel.List.Vexorium67.NameFrame.Name.DisplayName | "Vexorium67" | button=true
+UI Players.uuii888877.PlayerGui.PlayerList.Panel.List.Manyanvqz05693.NameFrame.Name.DisplayName | "Manyanvqz05693" | button=true
+UI Players.uuii888877.PlayerGui.PlayerList.Panel.List.Fabiankopi89893.NameFrame.Name.DisplayName | "Fabiankopi89893" | button=true
+UI Players.uuii888877.PlayerGui.PlayerList.Panel.List.myrivalmyidoll.NameFrame.Name.DisplayName | "BSK_GARED" | button=true
+UI Players.uuii888877.PlayerGui.PlayerList.Panel.List.Daniel_John147.NameFrame.Name.DisplayName | "Daniel_John147" | button=true
+UI Players.uuii888877.PlayerGui.PlayerList.Panel.List.uuii888877.NameFrame.Name.DisplayName | "uuii888877" | button=true
+UI Players.uuii888877.PlayerGui.PlayerList.Panel.List.gncrps.NameFrame.Name.DisplayName | "Hza1233" | button=true
+SWEEP 2 spots
+SWEEP done, nothing found
+EVENT dialogstart({npc=Workspace.gncrps, voice=3}, Workspace.gncrps.Head, {locked=false, maxdistance=500, leavemessages={1= }, dialog={1={choices={}, text=How'd it get away?, t=0.6}}}, nil, true)
+SWEEP 2 spots
+SWEEP done, nothing found
+CALL ReplicatedStorage.packages.Net.URE/QuestTrigger/Jump:FireServer()
+SWEEP 2 spots
+EVENT dialogstart({npc=Workspace.gncrps, voice=3}, Workspace.gncrps.Head, {locked=false, maxdistance=500, leavemessages={1= }, dialog={1={choices={}, text=..., t=0.6}}}, nil, true)
+CALL ReplicatedStorage.packages.Net.RE/RequestCustomNavigate:FireServer(goblin/batch561)
+SWEEP done, nothing found
+EVENT dialogstart({npc=Workspace.am_sussydrippyalt, voice=3}, Workspace.am_sussydrippyalt.Head, {locked=false, maxdistance=1000000000000000000, leavemessages={1= }, dialog={1={choices={}, text=It's a Snook!, t=0.6}}}, nil, true)
+EVENT dialogstart({idle=Workspace.world.npcs.Idle Fishing NPC Moosewood.description.idle, locked=false, npc=Workspace.world.npcs.Idle Fishing NPC Moosewood, voice=4, dialog={1={choices={}, text=...., t=2}}}, Workspace.world.npcs.Idle Fishing NPC Moosewood.Head, {dialog={1={choices={}, text=...., t=2}}}, nil)
+PROMPT Workspace.world.npcs.Moosewood Shipwright.dialogprompt | Talk / Shipwright
+PROMPT Workspace.world.npcs.Moosewood Shipwright.dialogprompt | Talk / Shipwright
+EVENT dialogstart({idle=Workspace.world.npcs.Moosewood Shipwright.description.idle, npc=Workspace.world.npcs.Moosewood Shipwright, voice=8}, Workspace.world.npcs.Moosewood Shipwright.Head, {locked=true, maxdistance=12, leavemessages={1=Goodbye!, 2=..., 3=See you!, 4=Bye.}, dialog={1={choices={1={text=I'd like to see my ships!, run=Workspace.world.npcs.Moosewood Shipwright.shipwright.giveUI, nextlinefalse=3}, 2={nextline=2, text=Nevermind}}, text=Hello! How can I help you?, t=0.3, animation=yes}, 2={choices={}, text=Okay, Goodbye!, t=0.4}, 3={choices={}, text=Not sure if that's possible.., skipto=4, t=1}, 4={choices={}, text=Maybe try becoming more experienced!, t=1}}}, nil)
+CALL Workspace.world.npcs.Moosewood Shipwright.shipwright.giveUI:InvokeServer({idle=Workspace.world.npcs.Moosewood Shipwright.description.idle, npc=Workspace.world.npcs.Moosewood Shipwright, voice=8})
+CALL ReplicatedStorage.packages.Net.RF/Boats/Purchase:InvokeServer(Rowboat)
+CALL ReplicatedStorage.events.purchase:FireServer(Rowboat, Boat, nil, 1)
+CALL ReplicatedStorage.packages.Net.RF/Boats/Spawn:InvokeServer(Rowboat)
+CALL ReplicatedStorage.packages.Net.RE/Boats/Close:FireServer()
+EVENT dialogstart({idle=Workspace.world.npcs.Idle Fishing NPC Moosewood2.description.idle, locked=false, npc=Workspace.world.npcs.Idle Fishing NPC Moosewood2, voice=4, dialog={1={choices={}, text=How has none bit yet?, t=2}}}, Workspace.world.npcs.Idle Fishing NPC Moosewood2.Head, {dialog={1={choices={}, text=How has none bit yet?, t=2}}}, nil)
+EVENT dialogstart({npc=Workspace.gncrps, voice=3}, Workspace.gncrps.Head, {locked=false, maxdistance=1000000000000000000, leavemessages={1= }, dialog={1={choices={}, text=PIKE!!!, t=0.6}}}, nil, true)
+CALL ReplicatedStorage.events.discoverlocation:FireServer(Mushgrove)
+CALL ReplicatedStorage.packages.Net.RF/GetActiveQuestData:InvokeServer(Stellarwave3)
+CALL ReplicatedStorage.packages.Net.RE/Quests/RequestNavigate:FireServer(nil, autostop)
+PROMPT Workspace.world.npcs.FischfrightGoblins.Goblin.ProximityPrompt | Talk / Goblin
+PROMPT Workspace.world.npcs.FischfrightGoblins.Goblin.ProximityPrompt | Talk / Goblin
+EVENT dialogstart({attr={Nav/Tag=goblin1681, NpcType=FischfrightGoblin, UID=goblin1681}, uid=goblin1681, idle=Workspace.world.npcs.FischfrightGoblins.Goblin.description.idle, tags={1=FischfrightGoblin, 2=Nav/Target, 3=NewNpc}, npc=Workspace.world.npcs.FischfrightGoblins.Goblin, voice=23}, Workspace.world.npcs.FischfrightGoblins.Goblin.RootPart, {locked=true, maxdistance=12, leavemessages={1=Better hurry up before I change my mind about the reward!, 2=Tick tock! That quest won't complete itself!, 3=Times a-wasting! Get moving!, 4=Don't dawdle! I haven't got all day!}, dialog={1={choices={1={text=Can I just get an <b><font color='#5bff3e'>Easy</font></b> one?, callback=true, arg=Easy}, 2={cs_trigger=cancel, text=Nevermind...}}, text=Hehe.. Want this ingredient I got? It has a price! HEHEHE!, nodeIndex=1}, 2={cs_await=started, text=<$msg$>, is_dynamic=true, nodeIndex=2}, 3={cs_await=started2, is_dynamic=true, choices={1={text=<$choice$>, is_dynamic=true, callback=true}}, text=<$msg$>, nodeIndex=3}, 4={cs_await=cancel, text=Coward! I knew you couldn't handle it!, nodeIndex=4}, 5={cs_await=wrong, text=WRONG!!! HEHEHEHAHAHAH!!, nodeIndex=5}, 6={cs_await=finish, text=Color me impressed! You finished it!, nodeIndex=6}, 7={cs_await=finishFavor, text=That branch suits you! Almost makes you look like a goblin!, nodeIndex=7}, 8={cs_await=error, text=HEEEEEEEEEEEEEEELP, nodeIndex=8}, 9={cs_await=choices1, is_dynamic=true, choices={1={callback=true, arg=1, is_dynamic=true, text=<$choice1$>}}, text=<$msg$>, nodeIndex=9}, 10={cs_await=choices2, is_dynamic=true, choices={1={callback=true, arg=1, is_dynamic=true, text=<$choice1$>}, 2={callback=true, arg=2, is_dynamic=true, text=<$choice2$>}}, text=<$msg$>, nodeIndex=10}, 11={cs_await=choices3, is_dynamic=true, choices={1={callback=true, arg=1, is_dynamic=true, text=<$choice1$>}, 2={callback=true, arg=2, is_dynamic=true, text=<$choice2$>}, 3={callback=true, arg=3, is_dynamic=true, text=<$choice3$>}}, text=<$msg$>, nodeIndex=11}, 12={cs_await=choices4, is_dynamic=true, choices={1={callback=true, arg=1, is_dynamic=true, text=<$choice1$>}, 2={callback=true, arg=2, is_dynamic=true, text=<$choice2$>}, 3={callback=true, arg=3, is_dynamic=true, text=<$choice3$>}, 4={callback=true, arg=4, is_dynamic=true, text=<$choice4$>}}, text=<$msg$>, nodeIndex=12}}})
+EVENT dialogstart({attr={Nav/Tag=goblin1681, NpcType=FischfrightGoblin, UID=goblin1681}, uid=goblin1681, idle=Workspace.world.npcs.FischfrightGoblins.Goblin.description.idle, tags={1=FischfrightGoblin, 2=Nav/Target, 3=NewNpc}, npc=Workspace.world.npcs.FischfrightGoblins.Goblin, voice=23}, Workspace.world.npcs.FischfrightGoblins.Goblin.RootPart, {locked=true, maxdistance=12, leavemessages={1=Better hurry up before I change my mind about the reward!, 2=Tick tock! That quest won't complete itself!, 3=Times a-wasting! Get moving!, 4=Don't dawdle! I haven't got all day!}, dialog={1={choices={1={text=Can I just get an <b><font color='#5bff3e'>Easy</font></b> one?, callback=true, arg=Easy}, 2={cs_trigger=cancel, text=Nevermind...}}, text=Want this ingredient I have? You must humiliate yourself for MY AMUSEMENT! HEHEHE!, nodeIndex=1}, 2={cs_await=started, text=<$msg$>, is_dynamic=true, nodeIndex=2}, 3={cs_await=started2, is_dynamic=true, choices={1={text=<$choice$>, is_dynamic=true, callback=true}}, text=<$msg$>, nodeIndex=3}, 4={cs_await=cancel, text=Fine, be that way! More for someone else!, nodeIndex=4}, 5={cs_await=wrong, text=WRONG!!! HEHEHEHAHAHAH!!, nodeIndex=5}, 6={cs_await=finish, text=Huh. Didn't think you had it in you!, nodeIndex=6}, 7={cs_await=finishFavor, text=A fellow branch enjoyer! Fine, you did good. Hehe!, nodeIndex=7}, 8={cs_await=error, text=HEEEEEEEEEEEEEEELP, nodeIndex=8}, 9={cs_await=choices1, is_dynamic=true, choices={1={callback=true, arg=1, is_dynamic=true, text=<$choice1$>}}, text=<$msg$>, nodeIndex=9}, 10={cs_await=choices2, is_dynamic=true, choices={1={callback=true, arg=1, is_dynamic=true, text=<$choice1$>}, 2={callback=true, arg=2, is_dynamic=true, text=<$choice2$>}}, text=<$msg$>, nodeIndex=10}, 11={cs_await=choices3, is_dynamic=true, choices={1={callback=true, arg=1, is_dynamic=true, text=<$choice1$>}, 2={callback=true, arg=2, is_dynamic=true, text=<$choice2$>}, 3={callback=true, arg=3, is_dynamic=true, text=<$choice3$>}}, text=<$msg$>, nodeIndex=11}, 12={cs_await=choices4, is_dynamic=true, choices={1={callback=true, arg=1, is_dynamic=true, text=<$choice1$>}, 2={callback=true, arg=2, is_dynamic=true, text=<$choice2$>}, 3={callback=true, arg=3, is_dynamic=true, text=<$choice3$>}, 4={callback=true, arg=4, is_dynamic=true, text=<$choice4$>}}, text=<$msg$>, nodeIndex=12}}})
+CALL ReplicatedStorage.packages.Net.RF/DialogInteract:InvokeServer(1, 1)
+---- UI DUMP (visible text) ----
+UI Players.uuii888877.PlayerGui.adminshower.title | "2.07.0.0.632 - 11889394255" | button=false
+UI Players.uuii888877.PlayerGui.backpack.hotbar.Folder.Frame.Open | "Touch To Open" | button=true
+UI Players.uuii888877.PlayerGui.backpack.hotbar.ItemTemplate.ItemName | "Flimsy Rod" | button=true
+UI Players.uuii888877.PlayerGui.backpack.hotbar.ItemTemplate.ItemName | "Equipment Bag" | button=true
+UI Players.uuii888877.PlayerGui.backpack.hotbar.ItemTemplate.ItemName | "Bestiary" | button=true
+UI Players.uuii888877.PlayerGui.backpack.hotbar.ItemTemplate.ItemName | "Quest Book" | button=true
+UI Players.uuii888877.PlayerGui.backpack.hotbar.ItemTemplate.ItemName | "Candy Bucket" | button=true
+UI Players.uuii888877.PlayerGui.backpack.hotbar.ItemTemplate.ItemName | "Crab Cage" | button=true
+UI Players.uuii888877.PlayerGui.backpack.hotbar.ItemTemplate.Stack | "x5" | button=true
+UI Players.uuii888877.PlayerGui.backpack.hotbar.ItemTemplate.ItemName | "Treasure Map
+Unrevealed" | button=true
+UI Players.uuii888877.PlayerGui.backpack.hotbar.ItemTemplate.ItemName | "Spider Eye" | button=true
+UI Players.uuii888877.PlayerGui.backpack.hotbar.ItemTemplate.Stack | "x3" | button=true
+UI Players.uuii888877.PlayerGui.backpack.hotbar.ItemTemplate.ItemName | "Crushed Bone" | button=true
+UI Players.uuii888877.PlayerGui.backpack.tooltip | "Tooltip! Very cool I know, I'm not sure how to mak" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.lvl | "Level 3" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.announcements.announcer.rodequipped.Main | "Equipped Rod Name Here!" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.announcements.announcer.unlocked.Main | "Unlocked Item Name Here!" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.announcements.announcer.thought.Main | "..." | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.announcements.announcer.quest.Main | "Quest Compelted!" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.announcements.announcer.thoughtbig.Main | "..." | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.announcements.announcer.catch.Main | "You just caught a Sockeye Salmon at 7.4kg!" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.announcements.announcer.popupNotif.notifContent.dismissButton | "Dismiss" | button=true
+UI Players.uuii888877.PlayerGui.hud.safezone.announcements.announcer.popupNotif.notifContent.body | "Visit Jack Marrow at Forsaken Shores to fix them." | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.announcements.announcer.popupNotif.notifContent.header | "You've reached the maximum number of Treasure Maps" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.announcements.announcer.bestiary.Main | "Bestiary: New Max Weight!" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.bodyannouncements.bodyannouncer.offer.title | "Trade Request" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.bodyannouncements.bodyannouncer.offer.question | "Nickname [@Username] is offering you 1x <>Itemname" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.bodyannouncements.bodyannouncer.offer.confirm | "[Yes]" | button=true
+UI Players.uuii888877.PlayerGui.hud.safezone.bodyannouncements.bodyannouncer.offer.deny | "[No]" | button=true
+UI Players.uuii888877.PlayerGui.hud.safezone.bodyannouncements.bodyannouncer.changelogs.title | "Changelogs" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.bodyannouncements.bodyannouncer.changelogs.confirm | "[Close]" | button=true
+UI Players.uuii888877.PlayerGui.hud.safezone.compass.Compass.SW | "SW" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.compass.Compass.NW | "NW" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.statuses.FriendBoost.Percent | "+0% XP" | button=true
+UI Players.uuii888877.PlayerGui.hud.safezone.statuses.FriendBoost.Multiplier | "Invite" | button=true
+UI Players.uuii888877.PlayerGui.hud.safezone.topannouncements.topannouncer.event.Main | "Event Has Started" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.topannouncements.topannouncer.ui.Main | "Event Has Started" | button=false
+UI Players.uuii888877.PlayerGui.hud.safezone.topbar.MainMenu | "Menu" | button=true
+UI Players.uuii888877.PlayerGui.hud.safezone.topbar.ShopMenu | "Shop" | button=true
+UI Players.uuii888877.PlayerGui.hud.safezone.topbar.ShopMenu.Label | "Shop" | button=true
+UI Players.uuii888877.PlayerGui.hud.safezone.coins | "2,250 C$" | button=false
+UI Players.uuii888877.PlayerGui.hud.sa
+
+
+
+--[[
+Goblin Auto v3 | Fisch - FischFright 3 | Delta
+Run while the FischFright 3 goblins are spawned (every 5 min).
+
+Flow per goblin (nearest first):
+TP -> Talk -> pick difficulty -> read objective -> do it -> TP back -> Talk -> claim
+
+Auto objectives : type in chat, dance, jump, walk
+Skipped + logged: catch / perfect catch / drown / burn / freeze / trick-or-treat / guess / insult
+Dialog is driven through the GUI (buttons + text) because the dialog remotes
+have not been captured yet. Every remote call is logged for the next version.
+
+Buttons: Auto ON/OFF | Copy report | Clear
+Re-running replaces the previous instance.
+]]
+
+local Players = game:GetService("Players")
+local RS = game:GetService("ReplicatedStorage")
+local PPS = game:GetService("ProximityPromptService")
+local TCS = game:GetService("TextChatService")
+local GuiService = game:GetService("GuiService")
+local RunService = game:GetService("RunService")
+local lp = Players.LocalPlayer
+
+local okVim, VIM = pcall(function() return game:GetService("VirtualInputManager") end)
+if not okVim then VIM = nil end
+
+local CFG = {
+difficulty = "Easy",     -- Easy | Normal | Hard | Extreme | Ultimate
+scanDelay = 2,           -- seconds between goblin scans
+dialogWait = 1.1,        -- seconds between dialog clicks
+tpOffset = CFrame.new(0, 3, 6),
+fastJump = false,        -- true = fire the Jump quest remote directly (faster, riskier)
+clickMode = "conn",      -- "conn" = fire button connections | "vim" = real click
+useDisplayName = false,  -- fills <player> if it ever shows up literally in a sentence
+}
+
+local genv = (getgenv and getgenv()) or _G
+local running, enabled = true, true
+local lines, seen, conns = {}, {}, {}
+
+local function log(s)
+if #lines < 1500 then lines[#lines + 1] = s end
+print("[GA] " .. s)
+end
+
+local function fmt(a, d)
+d = d or 0
+if typeof(a) == "Instance" then return a:GetFullName() end
+if type(a) == "table" then
+if d >= 2 then return "{...}" end
+local p = {}
+for k, v in pairs(a) do p[#p + 1] = tostring(k) .. "=" .. fmt(v, d + 1) end
+return "{" .. table.concat(p, ", ") .. "}"
+end
+return tostring(a)
+end
+
+---------------------------------------------------------------- remote logging
+local skipKeys = { "ClientKit", "Settings/Edit", "ResourceStream", "SetHotbar", "Analytics", "SetZone" }
+local function noisy(path)
+for _, k in ipairs(skipKeys) do
+if path:find(k, 1, true) then return true end
+end
+return false
+end
+
+genv.GA_CALL = function(line)
+if not seen[line] then
+seen[line] = true
+log(line)
+end
+end
+
+if hookmetamethod and getnamecallmethod then
+if not genv.GA_HOOKED then
+genv.GA_HOOKED = true
+local nc = newcclosure or function(f) return f end
+local old
+old = hookmetamethod(game, "__namecall", nc(function(self, ...)
+local m = getnamecallmethod()
+if m == "FireServer" or m == "InvokeServer" then
+local t = table.pack(...)
+local remote = self
+task.defer(function()
+local path = fmt(remote)
+if noisy(path) then return end
+local parts = {}
+for i = 1, t.n do parts[i] = fmt(t[i]) end
+local f = genv.GA_CALL
+if f then f("CALL " .. path .. ":" .. m .. "(" .. table.concat(parts, ", ") .. ")") end
+end)
+end
+return old(self, ...)
+end))
+end
+else
+log("NOTE: executor has no hookmetamethod (remote calls will not be logged)")
+end
+
+local function listen(r)
+if r and r:IsA("BaseRemoteEvent") then
+conns[#conns + 1] = r.OnClientEvent:Connect(function(...)
+local t = table.pack(...)
+local parts = {}
+for i = 1, t.n do parts[i] = fmt(t[i]) end
+log("EVENT " .. r.Name .. "(" .. table.concat(parts, ", ") .. ")")
+end)
+end
+end
+
+local ev = RS:FindFirstChild("events")
+if ev then listen(ev:FindFirstChild("dialogstart")) end
+local pk = RS:FindFirstChild("packages")
+local net = pk and pk:FindFirstChild("Net")
+if net then
+for _, r in ipairs(net:GetChildren()) do
+local n = r.Name
+if n:find("Goblins/", 1, true) or n:find("TrickOrTreat/", 1, true) or n:find("QuestTrigger", 1, true) then
+listen(r)
+end
+end
+end
+
+conns[#conns + 1] = PPS.PromptTriggered:Connect(function(p)
+log("PROMPT " .. p:GetFullName() .. " | " .. p.ActionText .. " / " .. p.ObjectText)
+end)
+
+---------------------------------------------------------------- helpers
+local function hrpOf()
+local c = lp.Character
+return c and c:FindFirstChild("HumanoidRootPart"), c and c:FindFirstChildOfClass("Humanoid")
+end
+
+local function clean(s)
+s = tostring(s or "")
+local nm = CFG.useDisplayName and lp.DisplayName or lp.Name
+s = s:gsub("<[Pp]layer>", function() return nm end)
+s = s:gsub("<[^>]+>", "")
+s = s:gsub("\226\128\156", '"'):gsub("\226\128\157", '"'):gsub("\226\128\153", "'")
+return s
+end
+
+local function goblins()
+local out = {}
+local w = workspace:FindFirstChild("world")
+local npcs = w and w:FindFirstChild("npcs")
+local folder = npcs and npcs:FindFirstChild("FischfrightGoblins")
+if folder then
+for _, m in ipairs(folder:GetChildren()) do
+if m:IsA("Model") then out[#out + 1] = m end
+end
+end
+return out
+end
+
+local function tpTo(model)
+local hrp = hrpOf()
+if not hrp or not model.Parent then return false end
+local cf = model:GetPivot()
+pcall(function() lp:RequestStreamAroundAsync(cf.Position) end)
+hrp.CFrame = cf * CFG.tpOffset
+hrp.AssemblyLinearVelocity = Vector3.zero
+task.wait(1)
+return true
+end
+
+---------------------------------------------------------------- GUI reading / clicking
+local function visibleChain(g)
+local pg = lp.PlayerGui
+local o = g
+while o and o ~= pg do
+if o:IsA("GuiObject") and not o.Visible then return false end
+if o:IsA("ScreenGui") and not o.Enabled then return false end
+o = o.Parent
+end
+return o == pg
+end
+
+local base = {}
+local function key(g) return g:GetFullName() .. "|" .. g.Text end
+local function isText(g) return g:IsA("TextButton") or g:IsA("TextLabel") end
+
+-- remember what is visible right now, so only NEW text counts later
+local function snapshot()
+base = {}
+for _, g in ipairs(lp.PlayerGui:GetDescendants()) do
+if isText(g) and visibleChain(g) then base[key(g)] = true end
+end
+end
+
+local function texts(onlyNew)
+local out = {}
+for _, g in ipairs(lp.PlayerGui:GetDescendants()) do
+if isText(g) and #g.Text > 1 and visibleChain(g) then
+if not onlyNew or not base[key(g)] then out[#out + 1] = g end
+end
+end
+return out
+end
+
+local function clickTarget(g)
+if g:IsA("GuiButton") then return g end
+return g:FindFirstAncestorWhichIsA("GuiButton")
+end
+
+local function fireConns(sig)
+if not getconnections then return 0 end
+local n = 0
+local ok, list = pcall(getconnections, sig)
+if ok and type(list) == "table" then
+for _, c in ipairs(list) do
+if pcall(function() c:Fire() end) then n = n + 1 end
+end
+end
+return n
+end
+
+local function realClick(g)
+if not VIM then return false end
+local p, s = g.AbsolutePosition, g.AbsoluteSize
+local sg = g:FindFirstAncestorWhichIsA("ScreenGui")
+local inset = (sg and sg.IgnoreGuiInset) and Vector2.zero or GuiService:GetGuiInset()
+local x, y = p.X + s.X / 2 + inset.X, p.Y + s.Y / 2 + inset.Y
+VIM:SendMouseButtonEvent(x, y, 0, true, game, 0)
+task.wait(0.06)
+VIM:SendMouseButtonEvent(x, y, 0, false, game, 0)
+return true
+end
+
+local function press(btn)
+if CFG.clickMode == "conn" then
+if fireConns(btn.Activated) > 0 then return "Activated" end
+if fireConns(btn.MouseButton1Click) > 0 then return "MouseButton1Click" end
+end
+if realClick(btn) then return "vim" end
+return "none"
+end
+
+---------------------------------------------------------------- dialog
+local DIFF = { "easy", "normal", "hard", "extreme", "ultimate" }
+local EXCLUDE = { "never", "leave", "bye", "cancel", "close", "decline", "nope", "not now" }
+local PREFER = { "accept", "okay", "ok", "sure", "deal", "yes", "fine", "continue", "next",
+"claim", "complete", "done", "turn in", "reward", "thank", "alright", "bring it" }
+
+local function hasAny(txt, list)
+for _, w in ipairs(list) do
+if txt:find(w, 1, true) then return true end
+end
+return false
+end
+
+local dialogGui = nil
+local clicked = setmetatable({}, { __mode = "k" })
+
+local function pickDifficulty()
+local want = CFG.difficulty:lower()
+local order = { want }
+for _, d in ipairs(DIFF) do
+if d ~= want then order[#order + 1] = d end
+end
+local t0, settled = os.clock(), false
+while os.clock() - t0 < 8 do
+local cands = {}
+for _, g in ipairs(texts(true)) do
+local b = clickTarget(g)
+if b then cands[#cands + 1] = { b = b, t = clean(g.Text):lower() } end
+end
+if #cands > 0 and not settled then
+settled = true -- let the rest of the options finish appearing
+task.wait(0.6)
+else
+for _, w in ipairs(order) do
+for _, c in ipairs(cands) do
+if c.t:find(w, 1, true) then return c.b, c.t end
+end
+end
+task.wait(0.3)
+end
+end
+return nil
+end
+
+local function dialogButtons()
+if dialogGui and not dialogGui.Parent then dialogGui = nil end
+local out = {}
+for _, g in ipairs(texts(true)) do
+local b = clickTarget(g)
+if b and (not dialogGui or g:IsDescendantOf(dialogGui)) then
+local recent = clicked[b] and os.clock() - clicked[b] < 5
+local t = clean(g.Text):lower()
+if not recent and not hasAny(t, EXCLUDE) and not hasAny(t, DIFF) then
+out[#out + 1] = { b = b, t = t }
+end
+end
+end
+return out
+end
+
+---------------------------------------------------------------- objective parsing
+local function numAfter(l, kw)
+local rest = l:match(kw .. "(.)")
+if not rest then return nil end
+local a, b = rest:match("(%d+)%s/%s*(%d+)")
+if a then return tonumber(b) end
+local n = rest:match("(%d[%d,]*)")
+return n and tonumber((n:gsub(",", ""))) or nil
+end
+
+local function parse(raw)
+local t = clean(raw)
+local l = t:lower()
+
+local q = t:match('[Tt]ype%s*"(.-)"')
+if q and l:find("in chat", 1, true) then
+local n = tonumber(l:match("in chat%s+(%d+)%s+times"))
+or (l:find("in chat twice", 1, true) and 2) or 1
+return { kind = "chat", text = q, count = n }
+end
+if l:find("dance", 1, true) and l:find("%d") then
+return { kind = "dance", secs = numAfter(l, "dance") or 15 }
+end
+if l:find("jump%D*%d") then return { kind = "jump", n = numAfter(l, "jump") } end
+if l:find("walk%D*%d") then return { kind = "walk", n = numAfter(l, "walk") } end
+
+for _, k in ipairs({ "catch", "perfect", "beatrix", "insult", "trick", "guess", "drown", "burn", "freeze" }) do
+if l:find(k, 1, true) then return { kind = "skip", why = k } end
+end
+return nil
+
+end
+
+local function readObjective()
+for _, g in ipairs(texts(true)) do
+local o = parse(g.Text)
+if o then return o, clean(g.Text) end
+end
+return nil
+end
+
+local function advance(rounds, wantObj)
+local obj, raw
+for _ = 1, rounds do
+task.wait(CFG.dialogWait)
+if wantObj and not obj then obj, raw = readObjective() end
+local cands = dialogButtons()
+if #cands == 0 then break end
+local pick = cands[1]
+for _, c in ipairs(cands) do
+if hasAny(c.t, PREFER) then
+pick = c
+break
+end
+end
+clicked[pick.b] = os.clock()
+log(('CLICK "%s" via %s'):format(pick.t:sub(1, 60), press(pick.b)))
+end
+if wantObj then
+local t0 = os.clock()
+while not obj and os.clock() - t0 < 5 do
+obj, raw = readObjective()
+if not obj then task.wait(0.5) end
+end
+end
+return obj, raw
+end
+
+local function talk(model)
+local pp = model:FindFirstChildWhichIsA("ProximityPrompt", true)
+if not pp then
+log("NOTE: no prompt on " .. model.Name)
+return false
+end
+pcall(function()
+pp.HoldDuration = 0
+pp.RequiresLineOfSight = false
+pp.MaxActivationDistance = 40
+end)
+snapshot()
+if fireproximityprompt then
+fireproximityprompt(pp)
+else
+pp:InputHoldBegin()
+task.wait(pp.HoldDuration + 0.1)
+pp:InputHoldEnd()
+end
+log("TALK " .. model.Name)
+return true
+end
+
+---------------------------------------------------------------- objective actions
+local function sendChat(msg)
+local ok = false
+if TCS.ChatVersion == Enum.ChatVersion.TextChatService then
+local chans = TCS:FindFirstChild("TextChannels")
+local ch = chans and (chans:FindFirstChild("RBXGeneral") or chans:FindFirstChildWhichIsA("TextChannel"))
+if ch then ok = pcall(function() ch:SendAsync(msg) end) end
+end
+if not ok then
+local dce = RS:FindFirstChild("DefaultChatSystemChatEvents")
+local req = dce and dce:FindFirstChild("SayMessageRequest")
+if req then
+req:FireServer(msg, "All")
+ok = true
+end
+end
+return ok
+end
+
+local function doChat(o)
+for _ = 1, o.count do
+if not running then return false end
+if not sendChat(o.text) then
+log("NOTE: could not send chat")
+return false
+end
+log("CHAT " .. o.text)
+task.wait(1.7)
+end
+return true
+end
+
+local function doDance(o)
+local _, hum = hrpOf()
+if not hum then return false end
+local ok, res = pcall(function() return hum:PlayEmote("dance") end)
+if not (ok and res) then sendChat("/e dance") end
+log("DANCE " .. o.secs .. "s")
+task.wait(o.secs + 2)
+return true
+end
+
+local function doJump(o)
+local _, hum = hrpOf()
+if not hum then return false end
+local n = o.n or 15
+local r = net and net:FindFirstChild("URE/QuestTrigger/Jump")
+log("JUMP x" .. n)
+if CFG.fastJump and r then
+for _ = 1, n do
+if not running then return false end
+r:FireServer()
+task.wait(0.12)
+end
+else
+for _ = 1, n do
+if not running then return false end
+hum.Jump = true
+hum:ChangeState(Enum.HumanoidStateType.Jumping)
+task.wait(0.55)
+end
+end
+return true
+end
+
+local function doWalk(o)
+local hrp, hum = hrpOf()
+if not hrp or not hum then return false end
+local goal = (o.n or 50) * 1.1 + 5
+log("WALK " .. goal .. " studs")
+local walked, last = 0, hrp.Position
+local hb = RunService.Heartbeat:Connect(function()
+local h = hrpOf()
+if not h then return end
+local d = (h.Position - last).Magnitude
+if d < 8 then walked = walked + d end -- ignore teleports
+last = h.Position
+end)
+
+local fwd = hrp.CFrame.LookVector * Vector3.new(1, 0, 1)
+if fwd.Magnitude < 0.1 then fwd = Vector3.new(0, 0, 1) end
+local a, b = hrp.Position, hrp.Position + fwd.Unit * 25
+local toB = true
+local t0 = os.clock()
+local timeout = goal / 10 + 30
+
+while walked < goal and running and os.clock() - t0 < timeout do
+local target = toB and b or a
+hum:MoveTo(target)
+local s = os.clock()
+repeat
+task.wait(0.1)
+local h = hrpOf()
+if not h then break end
+until (h.Position - target).Magnitude < 4 or os.clock() - s > 3.5
+toB = not toB
+end
+hb:Disconnect()
+return walked >= goal
+
+end
+
+local function perform(o)
+if o.kind == "chat" then return doChat(o)
+elseif o.kind == "dance" then return doDance(o)
+elseif o.kind == "jump" then return doJump(o)
+elseif o.kind == "walk" then return doWalk(o)
+end
+return false
+end
+
+---------------------------------------------------------------- per-goblin flow
+local function handleGoblin(m)
+if not tpTo(m) then return false end
+if not talk(m) then return false end
+
+local btn, label = pickDifficulty()
+if not btn then
+log("NOTE: no difficulty buttons on " .. m.Name .. " (already active, or the dialog UI is different)")
+advance(4, false)
+return false
+end
+dialogGui = btn:FindFirstAncestorWhichIsA("ScreenGui")
+clicked[btn] = os.clock()
+log(('PICK "%s" via %s'):format(label:sub(1, 60), press(btn)))
+
+local obj, raw = advance(5, true)
+if not obj then
+log("NOTE: objective text not found for " .. m.Name .. " - send the report")
+return false
+end
+log("OBJECTIVE " .. raw .. " -> " .. obj.kind)
+if obj.kind == "skip" then
+log("SKIP (do it manually): " .. obj.why)
+return true
+end
+
+if not perform(obj) then
+log("NOTE: objective did not finish")
+return false
+end
+
+if not m.Parent then
+log("NOTE: goblin left before turn-in")
+return false
+end
+tpTo(m)
+talk(m)
+advance(5, false)
+log("DONE " .. m.Name)
+return true
+
+end
+
+---------------------------------------------------------------- UI
+local gui = Instance.new("ScreenGui")
+gui.Name = "GoblinAuto"
+gui.ResetOnSpawn = false
+gui.Parent = (gethui and gethui()) or game:GetService("CoreGui")
+
+local function addButton(text, y, fn)
+local b = Instance.new("TextButton")
+b.Size = UDim2.new(0, 140, 0, 38)
+b.AnchorPoint = Vector2.new(1, 0)
+b.Position = UDim2.new(1, -10, 0, y)
+b.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+b.TextColor3 = Color3.new(1, 1, 1)
+b.Text = text
+b.Parent = gui
+b.Activated:Connect(function() fn(b) end)
+return b
+end
+
+addButton("Auto: ON", 110, function(b)
+enabled = not enabled
+b.Text = enabled and "Auto: ON" or "Auto: OFF"
+end)
+addButton("Copy report", 156, function()
+local txt = table.concat(lines, "\n")
+if setclipboard then setclipboard(txt) else warn("executor has no setclipboard") end
+end)
+addButton("Clear", 202, function()
+table.clear(lines)
+table.clear(seen)
+end)
+
+if genv.GoblinAutoStop then pcall(genv.GoblinAutoStop) end
+genv.GoblinAutoStop = function()
+running = false
+for _, c in ipairs(conns) do pcall(function() c:Disconnect() end) end
+gui:Destroy()
+end
+
+---------------------------------------------------------------- main loop
+local tries = setmetatable({}, { __mode = "k" })
+local done = setmetatable({}, { __mode = "k" })
+
+task.spawn(function()
+while running do
+if enabled then
+local list = goblins()
+local hrp = hrpOf()
+if hrp then
+table.sort(list, function(x, y)
+return (x:GetPivot().Position - hrp.Position).Magnitude
+< (y:GetPivot().Position - hrp.Position).Magnitude
+end)
+end
+for _, m in ipairs(list) do
+if not running or not enabled then break end
+if m.Parent and not done[m] and (tries[m] or 0) < 2 then
+tries[m] = (tries[m] or 0) + 1
+local ok, res = pcall(handleGoblin, m)
+if not ok then
+log("ERR " .. tostring(res))
+elseif res then
+done[m] = true
+end
+end
+end
+end
+task.wait(CFG.scanDelay)
+end
+end)
+
+log("READY | difficulty=" .. CFG.difficulty .. " | waiting for goblins")
+
+READY | difficulty=Easy | waiting for goblins
+TALK Eldritch Goblin
+PROMPT Workspace.world.npcs.FischfrightGoblins.Eldritch Goblin.ProximityPrompt | Talk / Eldritch Goblin
+NOTE: no difficulty buttons on Eldritch Goblin (already active, or the dialog UI is different)
+CLICK "time left: 9m 35s" via Activated
+PROMPT Workspace.world.npcs.FischfrightGoblins.Eldritch Goblin.ProximityPrompt | Talk / Eldritch Goblin
+EVENT dialogstart({attr={RBX_ReimportId=78b15681-9676-4e44-965c-72b5e284bad5, Nav/Tag=goblin112, NpcType=FischfrightGoblin, UID=goblin112}, uid=goblin112, idle=Workspace.world.npcs.FischfrightGoblins.Eldritch Goblin.description.idle, tags={1=FischfrightGoblin, 2=Nav/Target, 3=NewNpc}, npc=Workspace.world.npcs.FischfrightGoblins.Eldritch Goblin, voice=23}, Workspace.world.npcs.FischfrightGoblins.Eldritch Goblin.RootPart, {locked=true, maxdistance=12, leavemessages={1=Better hurry up before I change my mind about the reward!, 2=Tick tock! That quest won't complete itself!, 3=Times a-wasting! Get moving!, 4=Don't dawdle! I haven't got all day!}, dialog={1={...}, 2={...}, 3={...}, 4={...}, 5={...}, 6={...}, 7={...}, 8={...}, 9={...}, 10={...}, 11={...}, 12={...}}})
+EVENT dialogstart({idle=Workspace.world.npcs.Idle Fishing NPC Moosewood2.description.idle, locked=false, npc=Workspace.world.npcs.Idle Fishing NPC Moosewood2, voice=4, dialog={1={...}}}, Workspace.world.npcs.Idle Fishing NPC Moosewood2.Head, {dialog={1={...}}}, nil)
+CLICK "whocheese" via Activated
+CLICK "book-open" via Activated
+CALL ReplicatedStorage.packages.Net.RF/FischersJournal/RequestOnline:InvokeServer(Players.huutri199134)
+CLICK "stats" via vim
+TALK Goblin
+PROMPT Workspace.world.npcs.FischfrightGoblins.Goblin.ProximityPrompt | Talk / Goblin
+CALL ReplicatedStorage.packages.Net.RE/Backpack/Favourite:FireServer(Treasure Map495569165, true)
+NOTE: no difficulty buttons on Goblin (already active, or the dialog UI is different)
+CLICK "touch to open" via Activated
+CLICK "time left: 9m 18s" via Activated
+CLICK "99" via Activated
+CALL ReplicatedStorage.packages.Net.RE/Monetization/BuyProduct:FireServer(2657335337)
+TALK Ghoulish Goblin
+PROMPT Workspace.world.npcs.FischfrightGoblins.Ghoulish Goblin.ProximityPrompt | Talk / Ghoulish Goblin
+PROMPT Workspace.world.npcs.FischfrightGoblins.Ghoulish Goblin.ProximityPrompt | Talk / Ghoulish Goblin
+PROMPT Workspace.world.npcs.FischfrightGoblins.Ghoulish Goblin.ProximityPrompt | Talk / Ghoulish Goblin
+PROMPT Workspace.world.npcs.FischfrightGoblins.Ghoulish Goblin.ProximityPrompt | Talk / Ghoulish Goblin
+EVENT dialogstart({attr={RBX_ReimportId=96ff33d7-3165-4962-b939-b079c7cd77cf, Nav/Tag=goblin113, NpcType=FischfrightGoblin, UID=goblin113}, uid=goblin113, idle=Workspace.world.npcs.FischfrightGoblins.Ghoulish Goblin.description.idle, tags={1=FischfrightGoblin, 2=Nav/Target, 3=NewNpc}, npc=Workspace.world.npcs.FischfrightGoblins.Ghoulish Goblin, voice=23}, Workspace.world.npcs.FischfrightGoblins.Ghoulish Goblin.RootPart, {locked=true, maxdistance=12, leavemessages={1=Better hurry up before I change my mind about the reward!, 2=Tick tock! That quest won't complete itself!, 3=Times a-wasting! Get moving!, 4=Don't dawdle! I haven't got all day!}, dialog={1={...}, 2={...}, 3={...}, 4={...}, 5={...}, 6={...}, 7={...}, 8={...}, 9={...}, 10={...}, 11={...}, 12={...}}})
+EVENT dialogstart({attr={RBX_ReimportId=96ff33d7-3165-4962-b939-b079c7cd77cf, Nav/Tag=goblin113, NpcType=FischfrightGoblin, UID=goblin113}, uid=goblin113, idle=Workspace.world.npcs.FischfrightGoblins.Ghoulish Goblin.description.idle, tags={1=FischfrightGoblin, 2=Nav/Target, 3=NewNpc}, npc=Workspace.world.npcs.FischfrightGoblins.Ghoulish Goblin, voice=23}, Workspace.world.npcs.FischfrightGoblins.Ghoulish Goblin.RootPart, {locked=true, maxdistance=12, leavemessages={1=Better hurry up before I change my mind about the reward!, 2=Tick tock! That quest won't complete itself!, 3=Times a-wasting! Get moving!, 4=Don't dawdle! I haven't got all day!}, dialog={1={...}, 2={...}, 3={...}, 4={...}, 5={...}, 6={...}, 7={...}, 8={...}, 9={...}, 10={...}, 11={...}, 12={...}}})
+EVENT dialogstart({attr={RBX_ReimportId=96ff33d7-3165-4962-b939-b079c7cd77cf, Nav/Tag=goblin113, NpcType=FischfrightGoblin, UID=goblin113}, uid=goblin113, idle=Workspace.world.npcs.FischfrightGoblins.Ghoulish Goblin.description.idle, tags={1=FischfrightGoblin, 2=Nav/Target, 3=NewNpc}, npc=Workspace.world.npcs.FischfrightGoblins.Ghoulish Goblin, voice=23}, Workspace.world.npcs.FischfrightGoblins.Ghoulish Goblin.RootPart, {locked=true, maxdistance=12, leavemessages={1=Better hurry up before I change my mind about the reward!, 2=Tick tock! That quest won't complete itself!, 3=Times a-wasting! Get moving!, 4=Don't dawdle! I haven't got all day!}, dialog={1={...}, 2={...}, 3={...}, 4={...}, 5={...}, 6={...}, 7={...}, 8={...}, 9={...}, 10={...}, 11={...}, 12={...}}})
+NOTE: no difficulty buttons on Ghoulish Goblin (already active, or the dialog UI is different)
+CLICK "time left: 9m 5s" via Activated
+CALL ReplicatedStorage.packages.Net.RF/DialogInteract:InvokeServer(1, 1)
+CLICK "99" via Activated
+CALL ReplicatedStorage.packages.Net.RF/Crew/GetStatueBoards:InvokeServer()
+TALK Ghoulish Goblin
+PROMPT Workspace.world.npcs.FischfrightGoblins.Ghoulish Goblin.ProximityPrompt | Talk / Ghoulish Goblin
+PICK "normal goblin quest: jumping" via Activated
+CLICK "time left: 8m 50s" via Activated
+CLICK "99" via Activated
+CLICK "friend quest: bait crates" via Activated
+CLICK "track" via Activated
+CALL ReplicatedStorage.packages.Net.RE/Quests/ToggleTrack:FireServer(Workspace.PlayerStats.uuii888877.T.uuii888877.QuestActive.FriendQuest1, true)
+CLICK "10m" via Activated
+OBJECTIVE Jump 50 times (0/50) -> jump
+JUMP x15
+CALL ReplicatedStorage.packages.Net.URE/QuestTrigger/Jump:FireServer()
+TALK Ghoulish Goblin
+PROMPT Workspace.world.npcs.FischfrightGoblins.Ghoulish Goblin.ProximityPrompt | Talk / Ghoulish Goblin
+EVENT dialogstart({npc=Workspace.long2110p, voice=3}, Workspace.long2110p.Head, {locked=false, maxdistance=1000000000000000000, leavemessages={1= }, dialog={1={...}}}, nil, true)
+CLICK "time left: 8m 34s" via Activated
+CLICK "99" via Activated
+DONE Ghoulish Goblin
+TALK Eldritch Goblin
+PROMPT Workspace.world.npcs.FischfrightGoblins.Eldritch Goblin.ProximityPrompt | Talk / Eldritch Goblin
+NOTE: no difficulty buttons on Eldritch Goblin (already active, or the dialog UI is different)
+EVENT dialogstart({npc=Workspace.long2110p, voice=3}, Workspace.long2110p.Head, {locked=false, maxdistance=1000000000000000000, leavemessages={1= }, dialog={1={...}}}, nil, true)
+CLICK "time left: 8m 21s" via Activated
+EVENT dialogstart({npc=Workspace.long2110p, voice=3}, Workspace.long2110p.Head, {locked=false, maxdistance=1000000000000000000, leavemessages={1= }, dialog={1={...}}}, nil, true)
+EVENT dialogstart({idle=Workspace.world.npcs.Idle Fishing NPC Moosewood2.description.idle, locked=false, npc=Workspace.world.npcs.Idle Fishing NPC Moosewood2, voice=4, dialog={1={...}}}, Workspace.world.npcs.Idle Fishing NPC Moosewood2.Head, {dialog={1={...}}}, nil)
+EVENT dialogstart({npc=Workspace.long2110p, voice=3}, Workspace.long2110p.Head, {locked=false, maxdistance=1000000000000000000, leavemessages={1= }, dialog={1={...}}}, nil, true)
+PROMPT Workspace.world.npcs.FischfrightGoblins.Ghoulish Goblin.ProximityPrompt | Talk / Ghoulish Goblin
+EVENT dialogstart({attr={RBX_ReimportId=96ff33d7-3165-4962-b939-b079c7cd77cf, Nav/Tag=goblin113, NpcType=FischfrightGoblin, UID=goblin113}, uid=goblin113, idle=Workspace.world.npcs.FischfrightGoblins.Ghoulish Goblin.description.idle, tags={1=FischfrightGoblin, 2=Nav/Target, 3=NewNpc}, npc=Workspace.world.npcs.FischfrightGoblins.Ghoulish Goblin, voice=23}, Workspace.world.npcs.FischfrightGoblins.Ghoulish Goblin.RootPart, {maxdistance=12, leavemessages={1=Better hurry up before I change my mind about the reward!, 2=Tick tock! That quest won't complete itself!, 3=Times a-wasting! Get moving!, 4=Don't dawdle! I haven't got all day!}, locked=true, cs_start=finish, dialog={1={...}, 2={...}, 3={...}, 4={...}, 5={...}, 6={...}, 7={...}, 8={...}, 9={...}, 10={...}, 11={...}, 12={...}}})
+EVENT RE/Goblins/Hide(goblin113)
+
+สวัสดี คือผมอยากให้สร้างสคิป แมพ fisch คือตอนนี้มีอีเว้น FischFright 3 และมันมมีให้ทำแบบ
+FischFright 3
+Goblin
+Common Goblin
+Ghoulish Goblin
+Eldritch Goblin
+A photo of a Goblin.
+
+Information
+Locations
+
+Ancient Isle, Drylands, Everturn Forest, Forsaken Shores, Lost Jungle, Moosewood, Mushgrove Swamp, Roslit Bay, Scoria Reach, Skycrest, Sunstone Island, Terrapin Island
+Event
+
+FischFright 3
+During the FischFright 3 event, every 5 minutes, three types of Goblins can spawn at the following locations:
+
+Ancient Isle
+Drylands
+Everturn Forest
+Forsaken Shores
+Lost Jungle
+Moosewood
+Mushgrove Swamp
+Roslit Bay
+Scoria Reach
+Skycrest
+Sunstone Island
+Terrapin Island
+Quests
+Goblins Rule!
+Public Humilation
+Drown.
+Frightful Catches
+Flimsy Catches
+???
+Beatrix Hater
+Jumping
+Perfection
+Trick-or-Treat
+Hike
+<Difficulty> Goblin Quest: Goblins Rule!
+Declare your allegiance to Goblinkind for all to hear!
+Type "<sentence>" in chat
+<Difficulty> Goblin Quest: Public Humilation
+"Can you do a foolish little jig for me?"
+Dance for <number> seconds
+<Difficulty> Goblin Quest: Drown.
+"Drown."
+Drown.
+Ultimate Goblin Quest: Drown.
+"Drown, burn, AND freeze! HEHEHEHE!"
+Drown. / Burn. / Freeze.
+<Difficulty> Goblin Quest: Frightful Catches
+"Catch some spooooky fish!"
+Catch <amount> FischFright 3 fish
+Ultimate Goblin Quest: Frightful Catches
+"Catch some spooooky fish!"
+Catch 20 different FischFright 3 fish
+<Difficulty> Goblin Quest: Flimsy Catches
+"Catch some fish with that flimsy little twig you call a rod."
+Catch <amount> fish with
+Flimsy Rod
+Ultimate Goblin Quest: Flimsy Catches
+"Catch some fish with that flimsy little twig you call a rod."
+Perfect Catch 25 fish in a row with
+Flimsy Rod
+<Difficulty> Goblin Quest: ???
+"Let's play a little game!"
+Guess <something>...?
+<Difficulty> Goblin Quest: Beatrix Hater
+"That witch sent you, eh? How about you go send my regards?"
+<Difficulty> Goblin Quest: Jumping
+"Why don't you put those legs to use?"
+Jump <amount> times
+<Difficulty> Goblin Quest: Perfection
+"Prove that you're as good at fishing as you claim."
+Perfect Catch <amount> fish
+<Difficulty> Goblin Quest: Trick-or-Treat
+"Beg on the streets for food! (Spookily)"
+Trick-or-Treat <amount of times>
+Ultimate Goblin Quest: Trick-or-Treat
+"Challenge the restless spirits!"
+Catch the ghost at a Haunted House while Trick-or-Treating
+<Difficulty> Goblin Quest: Hike
+"Eh, just go for a little hike."
+Walk <amount> studs
+The player has the option to choose 1 of 5 choices in regards to the difficulty and reward that comes with the quest. Note that, depending on the kind of goblin, some options are not available.
+
+Player Response
+"Can I just get an Easy one?"
+
+One of the following quest is picked at random:
+Type "Goblins Rule!" in chat
+Dance for 15 seconds
+Catch 3 FischFright 3 fish
+Catch 3 fish with Flimsy Rod
+Guess the Goblin's favorite holiday...?
+Insult Beatrix
+Jump 15 times
+Perfect Catch 5 fish
+Trick-or-Treat once
+Walk 50 studs
+Player Response
+"Give me a Normal quest"
+
+One of the following quest is picked at random:
+Type "Goblins Rule!" in chat 3 times
+Dance for 60 seconds
+Drown.
+Catch 8 FischFright 3 fish
+Catch 8 fish with Flimsy Rod
+Guess the Goblin's favorite color...?
+Insult Beatrix twice
+Jump 50 times
+Perfect Catch 8 fish
+Trick-or-Treat 3 times
+Walk 200 studs
+Player Response
+"I'll try a Hard quest"
+
+One of the following quest is picked at random:
+Type "Goblins Rule!" in chat
+Type "Goblins are the greatest!" in chat
+Type "I wish I were a Goblin!" in chat
+Dance for 120 seconds
+Drown. (2 times)
+Catch 15 FischFright 3 fish
+Catch 20 fish with Flimsy Rod
+Guess the Goblin's favorite ingredient...?
+Insult Beatrix 3 times
+Jump 100 times
+Perfect Catch 20 fish
+Trick-or-Treat 7 times
+Walk 500 studs
+Player Response
+"I'm up for something Extreme"
+
+One of the following quest is picked at random:
+Type "Goblins Rule!" in chat
+Type "I, <player>, understand that Goblins are superior to humans in every measurable way." in chat
+Type "I, <player>, will never surpass the brilliance of Goblins." in chat
+Type "I, <player>, could never be as strong as a Goblin in a million lifetimes." in chat
+Dance for 180 seconds
+Drown. (3 times)
+Catch 30 FischFright 3 fish
+Catch 40 fish with Flimsy Rod
+Guess the Goblin's name...?
+Insult Beatrix 10 times
+Jump 250 times
+Perfect Catch 40 fish
+Trick-or-Treat 15 times
+Walk 1,000 studs
+Player Response
+"Give me your ULTIMATE challenge"
+
+One of the following quest is picked at random:
+Dance for 300 seconds
+Drown.
+Burn.
+Freeze.
+Catch 20 different FischFright 3 fish
+Perfect Catch 25 fish in a row with Flimsy Rod
+Guess the Goblin's favorite fish...?
+Insult Beatrix 50 times
+Jump 500 times
+Perfect Catch 100 fish
+Catch the ghost at a Haunted House while Trick-or-Treating
+Walk 3,000 studs
+Quest Rewards
+Goblins reward the player with various ingredients upon completing their objectives, varying with the completed objective's difficulty.
+
+ประมาณนี้ และที่ผมอยากได้สคิปสำหรับอันนี้โดยฉเพราะเลย แบบพอ goblin เกิดก็วาปไปรับเควรส ทั้ง3ตัว และ ทำภารกิจ และไปรองของ
+
+
+
+
+ตอนนี้ติดปัญหาคือ goblin มันจะไปเกิดสุ่มที่เกาะอื่นใช่มั้ยนั้นแหละมันจะไม่วาปไป นายว่ามันอยังขาดอะไรข้อมูลremote ที่มีน่าจะมีgoblin เกิดทั้งหมด4ตำแหน่งตำ3ตำแหน่งคือเกาะเดียวกันและอีก1ตำแหน่งคือหลังจาก5นาทีผมขับไปอีกเกาะไปกดเอง1ตำแหน่ง และตอนนี้มันอยังไม่มีฟังชั่นแบบเลือกความยากเครวส
+
+และอีกอย่างคือพอผมขับเรือไปเกาะที่goblin เกิดเองพอขึ้ยฝั่งกดเควสไปตัวนึงมันวาปไปหาตัวอื่นในเกาะและกดเควสเองได้ซะงั้น
+
+และอีกอย่างการทำเควสก็ไม่ดีเลยและรับเครวสกฌไม่ได้ ได้แต่กดคุย คือมันต้องกดคุยก่อนและกดอีกรอบมรให้เลือก1กับสอง1คือรับเครวสและ2คือไม่คุย แต่ถ้าเรารับเควสไปนานๆมันมีตัวเลือกเพิ่มขึ้ยมาตามลำดับ
+1Easy
+2normal
+3Hard
+4Extreme
+5ULTIMATE
+6ไม่คุย
+ตามลำดับ
+
+ข้อมูลของเกาะที่เกิดและเควส
+
+During the FischFright 3 event, every 5 minutes, three types of Goblins can spawn at the following locations:
+
+Ancient Isle
+Drylands
+Everturn Forest
+Forsaken Shores
+Lost Jungle
+Moosewood
+Mushgrove Swamp
+Roslit Bay
+Scoria Reach
+Skycrest
+Sunstone Island
+Terrapin Island
+
+The player has the option to choose 1 of 5 choices in regards to the difficulty and reward that comes with the quest. Note that, depending on the kind of goblin, some options are not available.
+
+Player Response
+"Can I just get an Easy one?"
+
+One of the following quest is picked at random:
+Type "Goblins Rule!" in chat
+Dance for 15 seconds
+Catch 3 FischFright 3 fish
+Catch 3 fish with Flimsy Rod
+Guess the Goblin's favorite holiday...?
+Insult Beatrix
+Jump 15 times
+Perfect Catch 5 fish
+Trick-or-Treat once
+Walk 50 studs
+Player Response
+"Give me a Normal quest"
+
+One of the following quest is picked at random:
+Type "Goblins Rule!" in chat 3 times
+Dance for 60 seconds
+Drown.
+Catch 8 FischFright 3 fish
+Catch 8 fish with Flimsy Rod
+Guess the Goblin's favorite color...?
+Insult Beatrix twice
+Jump 50 times
+Perfect Catch 8 fish
+Trick-or-Treat 3 times
+Walk 200 studs
+Player Response
+"I'll try a Hard quest"
+
+One of the following quest is picked at random:
+Type "Goblins Rule!" in chat
+Type "Goblins are the greatest!" in chat
+Type "I wish I were a Goblin!" in chat
+Dance for 120 seconds
+Drown. (2 times)
+Catch 15 FischFright 3 fish
+Catch 20 fish with Flimsy Rod
+Guess the Goblin's favorite ingredient...?
+Insult Beatrix 3 times
+Jump 100 times
+Perfect Catch 20 fish
+Trick-or-Treat 7 times
+Walk 500 studs
+Player Response
+"I'm up for something Extreme"
+
+One of the following quest is picked at random:
+Type "Goblins Rule!" in chat
+Type "I, <player>, understand that Goblins are superior to humans in every measurable way." in chat
+Type "I, <player>, will never surpass the brilliance of Goblins." in chat
+Type "I, <player>, could never be as strong as a Goblin in a million lifetimes." in chat
+Dance for 180 seconds
+Drown. (3 times)
+Catch 30 FischFright 3 fish
+Catch 40 fish with Flimsy Rod
+Guess the Goblin's name...?
+Insult Beatrix 10 times
+Jump 250 times
+Perfect Catch 40 fish
+Trick-or-Treat 15 times
+Walk 1,000 studs
+Player Response
+"Give me your ULTIMATE challenge"
+
+One of the following quest is picked at random:
+Dance for 300 seconds
+Drown.
+Burn.
+Freeze.
+Catch 20 different FischFright 3 fish
+Perfect Catch 25 fish in a row with Flimsy Rod
+Guess the Goblin's favorite fish...?
+Insult Beatrix 50 times
+Jump 500 times
+Perfect Catch 100 fish
+Catch the ghost at a Haunted House while Trick-or-Treating
+Walk 3,000 studs
+Quest Rewards
+Goblins reward the player with various ingredients upon completing their objectives, varying with the completed objective's difficulty.
+
+
+
+
+During the FischFright 3 event, every 5 minutes, three types of Goblins can spawn at the following locations:
+
+Ancient Isle
+Drylands
+Everturn Forest
+Forsaken Shores
+Lost Jungle
+Moosewood
+Mushgrove Swamp
+Roslit Bay
+Scoria Reach
+Skycrest
+Sunstone Island
+Terrapin Island
