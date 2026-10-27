@@ -1700,8 +1700,9 @@ local function goTo(cf)
 	return true
 end
 
--- everything else lives in its own scope (keeps the main chunk under Lua's 200-locals limit)
-do
+-- the whole menu is built inside its own function: a function gets its own 200-locals budget,
+-- the main chunk is already close to the limit (a plain do-block does NOT help, its locals still count)
+local function buildUI()
 	local UIS = game:GetService("UserInputService")
 	local TweenService = game:GetService("TweenService")
 
@@ -2259,6 +2260,12 @@ do
 			task.wait(0.5)
 		end
 	end)
+end
+
+local okUI, errUI = pcall(buildUI)
+if not okUI then
+	log("UI ERROR: " .. tostring(errUI))
+	warn("[GA] menu failed to build: " .. tostring(errUI))
 end
 
 genv.GoblinAutoStop = function()
