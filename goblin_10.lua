@@ -238,7 +238,7 @@ local function cancelEmote()
 	if r then pcall(function() r:FireServer() end) end
 end
 
-local function exitEmote()
+local function exitEmote(stay)
 	cancelEmote()
 	local hrp, hum = hrpOf()
 	if not hrp or not hum then return end
@@ -256,10 +256,12 @@ local function exitEmote()
 		pcall(function() an.Disabled = false end)
 		pcall(function() an.Enabled = true end)
 	end
-	hum:MoveTo(hrp.Position + hrp.CFrame.LookVector * 4)
-	tap(Enum.KeyCode.W, 0.35) -- a real key press: most games cancel an emote on input
-	tap(Enum.KeyCode.Space, 0.1)
-	hum.Jump = true
+	if not stay then
+		hum:MoveTo(hrp.Position + hrp.CFrame.LookVector * 4)
+		tap(Enum.KeyCode.W, 0.35) -- a real key press: most games cancel an emote on input
+		tap(Enum.KeyCode.Space, 0.1)
+		hum.Jump = true
+	end
 	task.wait(0.5)
 	log("EMOTE stop (" .. n .. " tracks)")
 end
@@ -859,9 +861,11 @@ local function openDialog(model)
 		if hrp and (hrp.Position - promptPos(model)).Magnitude > 10 then
 			tpTo(model)
 		end
+		local pin = hrpOf()
+		if pin then pin.Anchored = true end -- ยืนนิ่งระหว่างคุย กันฟิสิกส์ดันออก
 		dialogAt[model] = nil
 		cancelEmote()
-		if attempt >= 2 then stopEmote(); exitEmote() end
+		if attempt >= 2 then stopEmote(); exitEmote(true) end
 		task.wait(0.1)
 		firePrompt(pp, attempt % 2 == 1)
 		local w0, again = os.clock(), false
@@ -907,11 +911,11 @@ local function parse(raw)
 	local t = clean(raw)
 	local l = t:lower()
 
-	local q = t:match('[Tt]ype%s*"(.-)"')
+	local q = t:match('[Tt]ype[^"]-"(.-)"')
 	if q and l:find("in chat", 1, true) then
 		local n = tonumber(l:match("in chat%s+(%d+)%s+times"))
 			or (l:find("in chat twice", 1, true) and 2) or 1
-		return { kind = "chat", text = q, count = n }
+		return { kind = "chat", text = q, count = remaining(l, n) }
 	end
 	if l:find("%f[%a]danc") or l:find("%f[%a]jig%f[%A]") then
 		local n = numAfter(l, "danc") or numAfter(l, "jig")
@@ -924,6 +928,10 @@ local function parse(raw)
 	if l:find("walk%D*%d") then
 		local n = numAfter(l, "walk")
 		return { kind = "walk", n = n and remaining(l, n) }
+	end
+
+	if l:find("insult", 1, true) and l:find("beatrix", 1, true) then
+		return { kind = "insult", n = remaining(l, numAfter(l, "beatrix") or 1) }
 	end
 
 	for _, k in ipairs({ "catch", "perfect", "beatrix", "insult", "trick", "guess", "drown", "burn", "freeze" }) do
@@ -1027,33 +1035,38 @@ local function doDance(o)
 	return true
 end
 
+local hudProgress -- forward declaration: doJump uses it before its definition
+
 local function doJump(o)
 	local _, hum = hrpOf()
 	if not hum then return false end
-	local n = o.n or 15
 	local r = net and net:FindFirstChild("URE/QuestTrigger/Jump")
-	log("JUMP x" .. n)
-	if CFG.fastJump and r then
-		for _ = 1, n do
+	local left = o.n or 15
+	log("JUMP x" .. left)
+	for _ = 1, 4 do -- รอบ 2 ขึ้นไป = เติมส่วนที่ HUD บอกว่ายังขาด
+		for _ = 1, left do
 			touch(30)
-			if not running then return false end
-			r:FireServer()
-			task.wait(0.12)
+			if not running or hum.Health <= 0 then return false end
+			if CFG.fastJump and r then
+				r:FireServer()
+				task.wait(0.12)
+			else
+				hum.Jump = true
+				hum:ChangeState(Enum.HumanoidStateType.Jumping)
+				task.wait(0.55)
+			end
 		end
-	else
-		for _ = 1, n do
-			touch(30)
-			if not running then return false end
-			hum.Jump = true
-			hum:ChangeState(Enum.HumanoidStateType.Jumping)
-			task.wait(0.55)
-		end
+		task.wait(0.5)
+		local a, b = hudProgress("jump")
+		if not a or a >= b then return true end
+		left = b - a
+		log(("JUMP short %d/%d - %d more"):format(a, b, left))
 	end
-	return true
+	return false
 end
 
 -- "(a/b)" of the first quest-HUD line that mentions `word` (PlayerGui.hud.deviceinset.quests)
-local function hudProgress(word)
+hudProgress = function(word)
 	for _, g in ipairs(texts(false)) do
 		if g:GetFullName():find("deviceinset", 1, true) then
 			local l = clean(g.Text):lower()
@@ -1238,7 +1251,7 @@ local function doWalk2(o)
 		pcall(function() hum:Move(dir * flip, false) end)
 	end)
 	local ok, err = pcall(function()
-		while running and not done and os.clock() - t0 < 300 do
+		while running and not done and os.clock() - t0 < math.max(300, goal / 8) do
 			task.wait(0.1)
 			touch(30)
 			-- ตายระหว่างเดิน: เลิกทันที ห้ามนับว่าเควสเสร็จ
@@ -1307,7 +1320,49 @@ local function doWalk2(o)
 	return done
 end
 
+local function findWitch()
+	local w = workspace:FindFirstChild("world")
+	local n = w and w:FindFirstChild("npcs")
+	local f = n and n:FindFirstChild("fihfrigh")
+	return f and f:FindFirstChild("Witch")
+end
+
+local function doInsult(o)
+	local witch = findWitch()
+	if not (witch and DI) then
+		log("NOTE: Witch / DialogInteract not found")
+		return false
+	end
+	local need, sawHud = o.n or 1, false
+	for i = 1, need + 5 do -- +5 = รอบสำรอง
+		if not running then return false end
+		touch(30)
+		local a, b = hudProgress("insult")
+		if a then sawHud = true elseif sawHud then return true end -- บรรทัด HUD หายไป = เสร็จ
+		if a and a >= b then return true end
+		if not sawHud and i > need then return true end
+		if not tpTo(witch) or not openDialog(witch) then return false end
+		local cfg = dialogCfg[witch]
+		local ch = cfg and cfg.dialog and cfg.dialog[1] and cfg.dialog[1].choices
+		local idx
+		for k, c in ipairs(ch or {}) do
+			local t = clean(tostring(c.text or c.arg)):lower()
+			if i == 1 then log(("WITCH choice %d: %s"):format(k, t:sub(1, 60))) end
+			if not idx and t:find("insult", 1, true) then idx = k end
+		end
+		idx = idx or 4 -- ยังไม่ยืนยัน: เห็น DialogInteract(1, 4) ใน log ตอนเควส Insult ค้างอยู่
+		local ok, res = pcall(function() return DI:InvokeServer(1, idx) end)
+		log(("INSULT %d/%d -> %s %s"):format(i, need, tostring(ok), fmt(res)))
+		task.wait(0.6)
+		closeDialog()
+		task.wait(0.4)
+	end
+	return false
+end
+
 local function perform(o)
+	local h0 = hrpOf()
+	if h0 then h0.Anchored = false end
 	local char = lp.Character
 	local _, hum = hrpOf()
 	local res = false
@@ -1315,6 +1370,7 @@ local function perform(o)
 	elseif o.kind == "dance" then res = doDance2(o)
 	elseif o.kind == "jump" then res = doJump(o)
 	elseif o.kind == "walk" then res = doWalk2(o)
+	elseif o.kind == "insult" then res = doInsult(o)
 	end
 	-- ตายระหว่างทำ (ไม่ว่าเควสชนิดไหน) = ไม่นับว่าเสร็จ ห้ามเซ็ต claim
 	if lp.Character ~= char or (hum and hum.Health <= 0) then
@@ -1374,7 +1430,7 @@ end
 -- true = answered | false = could not open the dialog | nil = not a multiple-choice dialog
 local function doChoice(m, alreadyOpen)
 	local tried = {}
-	for round = 1, 4 do
+	for round = 1, 8 do
 		if not (round == 1 and alreadyOpen) and not openDialog(m) then return false end
 		local cfg = dialogCfg[m]
 		local cs = cfg and tostring(cfg.cs_start) or ""
@@ -2152,6 +2208,8 @@ local function runOne(m, s, phase)
 	touch(90)
 	local char0 = lp.Character
 	local ok, res = pcall(handleGoblin, m, s, phase)
+	local hz = hrpOf()
+	if hz then hz.Anchored = false end
 	working = false
 	activity()
 	local acceptStage = phase == "accept" or (phase == nil and not s.obj) -- พลาดก่อนอ่านเควสได้ = พลาดตอนรับ
