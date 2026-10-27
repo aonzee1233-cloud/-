@@ -64,7 +64,7 @@ local CFG = {
 	talk = true,             -- false = ไม่คุยกับ goblin เลย
 	levels = { easy = true, normal = false, hard = false, extreme = false, ultimate = false },
 	fallbackDown = true,     -- goblin ไม่มีระดับที่เลือก -> ลงไปใช้ระดับต่ำกว่าที่มี
-	quests = { chat = true, dance = true, jump = true, walk = true, guess = true, insult = false },
+	quests = { chat = true, dance = true, jump = true, walk = true, guess = true, insult = false, trick = false },
 	scanOnJoin = true,       -- เข้าเซิฟใหม่: ไล่ขอ stream ทีละเกาะเพื่อหา goblin โดยไม่ต้องรอแจ้งเตือน (เปิด/ปิดได้ที่แท็บ Main > Scan islands)
 	watchdog = true,
 	failCool = 40,           -- goblin ที่ทำไม่สำเร็จครบ 4 ครั้ง พักกี่วินาที (x2 ทุกรอบ สูงสุด 300) แล้วไปหาตัวอื่นก่อน
@@ -981,6 +981,10 @@ local function parse(raw)
 		return { kind = "insult", n = remaining(l, numAfter(l, "beatrix") or 1) }
 	end
 
+	if l:find("trick", 1, true) and l:find("treat", 1, true) then
+		return { kind = "trick", n = remaining(l, 1) }
+	end
+
 	for _, k in ipairs({ "catch", "perfect", "beatrix", "insult", "trick", "guess", "drown", "burn", "freeze" }) do
 		if l:find(k, 1, true) then return { kind = "skip", why = k } end
 	end
@@ -1368,7 +1372,7 @@ local function doWalk2(o)
 end
 
 local witchPos      -- where Beatrix stood the last time she was loaded
-local ensureHallow  -- defined after goTo(): sails to the Halloween area if the Witch is not there yet
+local ensureHallow, doTrick  -- defined after goTo(): sails to the Halloween area if the Witch is not there yet
 
 local function findWitch()
 	local w = workspace:FindFirstChild("world")
@@ -1430,6 +1434,7 @@ local function perform(o)
 	elseif o.kind == "jump" then res = doJump(o)
 	elseif o.kind == "walk" then res = doWalk2(o)
 	elseif o.kind == "insult" then res = doInsult(o)
+	elseif o.kind == "trick" then res = doTrick(o)
 	end
 	-- ตายระหว่างทำ (ไม่ว่าเควสชนิดไหน) = ไม่นับว่าเสร็จ ห้ามเซ็ต claim
 	if lp.Character ~= char or (hum and hum.Health <= 0) then
@@ -1875,6 +1880,7 @@ ensureHallow = function()
 					return "DialogInteract(1, 1) -> " .. tostring(ok) .. " " .. fmt(res)
 				end,
 			}
+			table.insert(methods, 1, table.remove(methods)) -- DialogInteract(1, 1) first (confirmed in the log)
 			for _, method in ipairs(methods) do
 				local ok, how = pcall(method)
 				if ok and how then
@@ -1894,6 +1900,146 @@ ensureHallow = function()
 		task.wait(1)
 	end
 	return nil
+end
+
+-- Trick-or-treat (from the log): knock -> RE/TrickOrTreat/Visit -> RE/Rituals/Hands -> RF/TrickOrTreat/Treat({voice=2, npc=Door.TrickOrTreatN})
+-- -> RE/TrickOrTreat/Outcome -> RE/TrickOrTreat/Done. N changed every visit (1, 5, 11...), voice was always 2.
+local function housesFolder()
+	local w = workspace:FindFirstChild("world")
+	local m = w and w:FindFirstChild("map")
+	local f = m and m:FindFirstChild("Fischfright26")
+	return f and f:FindFirstChild("TrickOrTreat-Houses")
+end
+
+local function posOf(pp)
+	local p = pp.Parent
+	if p and p:IsA("BasePart") then return p.Position end
+	local ok, cf = pcall(function() return p:GetPivot() end)
+	return ok and cf and cf.Position or nil
+end
+
+local function isShown(c)
+	if c:IsA("BasePart") then return c.Transparency < 0.9 end
+	for _, d in ipairs(c:GetDescendants()) do
+		if d:IsA("BasePart") and d.Transparency < 0.9 then return true end
+	end
+	return false
+end
+
+doTrick = function(o)
+	local rVisit = net and net:FindFirstChild("RE/TrickOrTreat/Visit")
+	local rOutcome = net and net:FindFirstChild("RE/TrickOrTreat/Outcome")
+	local rDone = net and net:FindFirstChild("RE/TrickOrTreat/Done")
+	local rHands = net and net:FindFirstChild("RE/Rituals/Hands")
+	local fTreat = net and net:FindFirstChild("RF/TrickOrTreat/Treat")
+	if not (rVisit and rOutcome and fTreat) then
+		log("NOTE: trick-or-treat remotes not found")
+		return false
+	end
+	if not ensureHallow() then return false end -- the houses are in the Halloween area
+
+	local visit, outcome
+	local c1 = rVisit.OnClientEvent:Connect(function(id, _, secs)
+		visit = { id = id, secs = tonumber(secs) or 3 }
+	end)
+	local c2 = rOutcome.OnClientEvent:Connect(function(...)
+		outcome = table.pack(...)
+	end)
+
+	local need, got, tried = o.n or 1, 0, {}
+	local ok, err = pcall(function()
+		for _ = 1, need + 4 do
+			if not running or got >= need then return end
+			touch(60)
+			setStatus(("trick-or-treat %d/%d"):format(got, need))
+
+			-- nearest house we have not knocked on yet
+			local best, bestD, bestDoor, bestPP
+			local t0 = os.clock()
+			repeat
+				local folder, hrp = housesFolder(), hrpOf()
+				if folder and hrp then
+					for _, h in ipairs(folder:GetChildren()) do
+						local door = h:FindFirstChild("Door")
+						local pp = door and door:FindFirstChildWhichIsA("ProximityPrompt", true)
+						local pos = pp and posOf(pp)
+						if pos and not tried[h] then
+							local d = (pos - hrp.Position).Magnitude
+							if not bestD or d < bestD then best, bestD, bestDoor, bestPP = h, d, door, pp end
+						end
+					end
+				end
+				if not best then task.wait(0.5) end
+			until best or not running or os.clock() - t0 > 6
+			if not best then
+				log("NOTE: no trick-or-treat houses loaded here - stand near a house and try again")
+				return
+			end
+			tried[best] = true
+
+			local hrp = hrpOf()
+			local pos = posOf(bestPP)
+			if not (hrp and pos) then return end
+			pcall(function()
+				bestPP.HoldDuration = 0
+				bestPP.RequiresLineOfSight = false
+				bestPP.MaxActivationDistance = 40
+			end)
+			hrp.CFrame = CFrame.new(pos + Vector3.new(0, 3, 0))
+			hrp.AssemblyLinearVelocity = Vector3.zero
+			task.wait(0.6)
+
+			visit, outcome = nil, nil
+			firePrompt(bestPP, true)
+			local w0 = os.clock()
+			while running and not visit and os.clock() - w0 < 5 do task.wait(0.1) end
+			if not visit then
+				log("TRICK: no Visit event after knocking on house " .. best.Name)
+			else
+				task.wait(visit.secs + 0.5)
+				if rHands then pcall(function() rHands:FireServer() end) end
+
+				-- the NPC that is showing first, then the others in random order
+				local shown, rest = {}, {}
+				for _, c in ipairs(bestDoor:GetChildren()) do
+					if c.Name:find("^TrickOrTreat%d+$") then
+						table.insert(isShown(c) and shown or rest, c)
+					end
+				end
+				for i = #rest, 2, -1 do
+					local j = math.random(i)
+					rest[i], rest[j] = rest[j], rest[i]
+				end
+				local cands = {}
+				for _, c in ipairs(shown) do cands[#cands + 1] = c end
+				for _, c in ipairs(rest) do cands[#cands + 1] = c end
+				log(("TRICK house %s: %d npcs (%d showing)"):format(best.Name, #cands, #shown))
+
+				for i = 1, math.min(#cands, 3) do
+					local c = cands[i]
+					local okT, res = pcall(function() return fTreat:InvokeServer({ voice = 2, npc = c }) end)
+					log(("TREAT %s -> %s %s"):format(c.Name, tostring(okT), fmt(res)))
+					local t1 = os.clock()
+					while running and not outcome and os.clock() - t1 < 3 do task.wait(0.1) end
+					if outcome then
+						log("OUTCOME " .. fmt(outcome))
+						if rDone then pcall(function() rDone:FireServer() end) end
+						got = got + 1
+						break
+					end
+				end
+				if not outcome then log("TRICK: no Outcome on house " .. best.Name) end
+			end
+			task.wait(1)
+		end
+	end)
+	c1:Disconnect()
+	c2:Disconnect()
+	if not ok then
+		log("ERR trick " .. tostring(err))
+		return false
+	end
+	return got >= need
 end
 
 ---------------------------------------------------------------- scan islands (หา goblin ตอนเข้าเซิฟใหม่ ไม่ต้องรอแจ้งเตือน)
@@ -2301,6 +2447,7 @@ do
 		qrow(12, "walk", "Walk")
 		qrow(13, "guess", "Quiz / guess")
 		qrow(14, "insult", "Insult Beatrix")
+		qrow(15, "trick", "Trick-or-Treat")
 	end
 
 	---------------------------------------------------- tab: Warp (islands)
