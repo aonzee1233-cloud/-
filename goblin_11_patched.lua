@@ -65,6 +65,7 @@ local CFG = {
 	levels = { easy = true, normal = false, hard = false, extreme = false, ultimate = false },
 	fallbackDown = true,     -- goblin ไม่มีระดับที่เลือก -> ลงไปใช้ระดับต่ำกว่าที่มี
 	quests = { chat = true, dance = true, jump = true, walk = true, guess = true, insult = false },
+	scanOnJoin = true,       -- เข้าเซิฟใหม่: ไล่ขอ stream ทีละเกาะเพื่อหา goblin โดยไม่ต้องรอแจ้งเตือน
 	watchdog = true,
 	failCool = 40,           -- goblin ที่ทำไม่สำเร็จครบ 4 ครั้ง พักกี่วินาที (x2 ทุกรอบ สูงสุด 300) แล้วไปหาตัวอื่นก่อน
 	returnOnDeath = true,  -- ตายแล้วเกิดไกล: วาปกลับไปหา goblin ที่ยังค้างอยู่
@@ -1776,6 +1777,70 @@ local function dumpIslands()
 	end
 end
 
+---------------------------------------------------------------- scan islands (หา goblin ตอนเข้าเซิฟใหม่ ไม่ต้องรอแจ้งเตือน)
+-- ขอให้เกม stream พื้นที่รอบเกาะทีละเกาะ (ไม่ย้ายตัวละคร) แล้วดูว่า goblin โผล่ที่เกาะไหน
+local scanning = false
+local function scanIslands()
+	if scanning then return end
+	scanning = true
+	local found
+	local ok, err = pcall(function()
+		local cands, seenPos = {}, {}
+		for _, isl in ipairs(ISLANDS) do
+			local okI, cf = pcall(findIsland, isl)
+			if okI and cf then
+				local p = cf.Position
+				local k = ("%d,%d"):format(math.floor(p.X / 50), math.floor(p.Z / 50))
+				if not seenPos[k] then
+					seenPos[k] = true
+					cands[#cands + 1] = { name = isl[1], pos = p }
+				end
+			end
+		end
+		local h = hrpOf()
+		if h then
+			table.sort(cands, function(a, b)
+				return (a.pos - h.Position).Magnitude < (b.pos - h.Position).Magnitude
+			end)
+		end
+		log("SCAN islands: " .. #cands .. " spots")
+		for i, c in ipairs(cands) do
+			if not running then break end
+			setStatus(("scan %d/%d: %s"):format(i, #cands, c.name))
+			pcall(function() lp:RequestStreamAroundAsync(c.pos, 4) end)
+			task.wait(0.4)
+			local gm, gd
+			for _, m in ipairs(goblins()) do
+				local st = state[m]
+				if wantsModel(m) and not (st and st.done) and m:FindFirstChildWhichIsA("BasePart", true) then
+					local d = (m:GetPivot().Position - c.pos).Magnitude
+					if d < 700 and (not gd or d < gd) then gm, gd = m, d end
+				end
+			end
+			if gm then
+				local gp = gm:GetPivot().Position
+				local bestC, bestD = c, math.huge
+				for _, o in ipairs(cands) do
+					local d = (Vector3.new(o.pos.X, 0, o.pos.Z) - Vector3.new(gp.X, 0, gp.Z)).Magnitude
+					if d < bestD then bestC, bestD = o, d end
+				end
+				found = bestC
+				log(("SCAN goblin at (%.0f, %.0f, %.0f) -> %s"):format(gp.X, gp.Y, gp.Z, bestC.name))
+				break
+			end
+		end
+	end)
+	if not ok then log("ERR scan " .. tostring(err)) end
+	if found then
+		mem["island"] = { pos = found.pos, at = os.clock(), name = found.name }
+		pendingWarp = { name = found.name, cf = CFrame.new(found.pos), at = os.clock() }
+	else
+		log("SCAN: no goblins found on any known island")
+	end
+	scanning = false
+	setStatus("idle")
+end
+
 ---------------------------------------------------------------- ESP
 do
 	local esp = {} -- goblin model -> { hl, bb, lbl }
@@ -2182,7 +2247,7 @@ do
 		-- last "goblins have spawned at X!" alert; tap = fly to that island
 		local banner = button(pGob, "no spawn alert yet", function()
 			local si = spawnInfo
-			if si and si.pos then warpIsland(si.name, si.pos) end
+			if si and si.pos then warpIsland(si.name, si.pos) else task.spawn(scanIslands) end
 		end, C.card)
 		banner.Position = UDim2.fromOffset(0, 26)
 		banner.Size = UDim2.new(1, -8, 0, 22)
@@ -2346,7 +2411,7 @@ do
 						banner.Text = ("last spawn: %s · %s ago"):format(si.name, ago)
 						banner.TextColor3 = si.pos and C.on or C.sub
 					else
-						banner.Text = "no spawn alert yet"
+						banner.Text = "no alert yet · tap = scan islands"
 						banner.TextColor3 = C.sub
 					end
 					empty.Text = (#list == 0 and si and si.pos)
@@ -2994,6 +3059,12 @@ do
 end
 
 log("READY v12 | difficulty=" .. CFG.difficulty .. " | waiting for goblins")
+if CFG.scanOnJoin then
+	task.spawn(function()
+		task.wait(5) -- ให้ตัวละครโหลดนิ่งก่อน
+		if running and #fresh() == 0 then scanIslands() end
+	end)
+end
 do
 	local names = {}
 	for _, root in ipairs({ RS:FindFirstChild("events"), net }) do
