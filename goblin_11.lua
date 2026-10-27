@@ -23,8 +23,8 @@ What changed vs v9 (self-heal)
  * Dying during any objective (not only walking) is detected and the try is refunded.
  * New button: Fix now (runs the same repair by hand).
 
-UI v11: one draggable window. Header = Auto ON/OFF + fold. Tabs: Main (levels, options) | Warp (islands) |
-Goblins (live list, tap to warp) | Tools (Fix now, Copy report, Clear, Dump UI, Dump islands).
+UI v11: one draggable window (header also shows a countdown to the next goblin round). Header = Auto ON/OFF + fold. Tabs: Main (levels, options) | Warp (islands) |
+Goblins (grouped by island + last spawn alert, tap to warp) | Tools (Fix now, Copy report, Clear, Dump UI, Dump islands).
 If something still fails: open the dialog by hand, press Dump UI, then Copy report.
 ]]
 
@@ -59,11 +59,14 @@ local CFG = {
 	acceptCool = 60,         -- พักกี่วินาที (x2 ทุกรอบ สูงสุด 300)
 	deathCoolAfter = 3,      -- ตายซ้ำที่ goblin ตัวเดียวกันกี่ครั้ง -> พักตัวนั้นเหมือนกัน
 	esp = true,              -- ไฮไลต์ goblin + บอกระยะ (false = ซ่อน)
+	spawnEvery = 300,        -- goblin รอบใหม่เกิดทุกกี่วินาที (ใช้นับถอยหลังที่หัวหน้าต่าง; เกมบอกทุก 5 นาที)
 	retryAfter = 300,        -- a finished goblin that stays in place is retried after this long
 	talk = true,             -- false = ไม่คุยกับ goblin เลย
 	levels = { easy = true, normal = false, hard = false, extreme = false, ultimate = false },
 	watchdog = true,
 	failCool = 40,           -- goblin ที่ทำไม่สำเร็จครบ 4 ครั้ง พักกี่วินาที (x2 ทุกรอบ สูงสุด 300) แล้วไปหาตัวอื่นก่อน
+	returnOnDeath = true,  -- ตายแล้วเกิดไกล: วาปกลับไปหา goblin ที่ยังค้างอยู่
+	returnWindow = 600,    -- จำตำแหน่ง goblin ไว้กี่วินาทีนับจากเห็นครั้งสุดท้าย
 	hardResetAfter = 4,      -- ซ่อมแบบเบากี่รอบติดแล้วยังไม่หาย -> รีเซ็ตตัวละคร (0 = ปิด)
 	islandPos = {
 		["Moosewood"]       = Vector3.new(380, 135, 234),
@@ -92,10 +95,12 @@ local lines, seen, conns = {}, {}, {}
 
 ---------------------------------------------------------------- state
 local state = setmetatable({}, { __mode = "k" })      -- goblin model -> status table
+local mem, needReturn = {}, false -- mem: uid -> { pos, at, name }
 local dialogAt = setmetatable({}, { __mode = "k" })   -- npc -> time of last dialogstart
 local dialogCfg = setmetatable({}, { __mode = "k" })
 local lastClick = setmetatable({}, { __mode = "k" })  -- button -> { t = text, at = time }
 local pendingWarp = nil -- { name, cf, at } ใส่โดยตัวดักแจ้งเตือน spawn / tickOnce เป็นคนเอาไปใช้
+local spawnInfo = nil   -- { name, at, pos } last "goblins have spawned at X!" alert (shown in the Goblins tab)
 local dialogRoot = nil
 local statusLbl = nil
 local working = false         -- true while a goblin / sweep is being processed
@@ -418,6 +423,7 @@ local function onEvent(name, t)
 			for i = 1, t.n do
 				local v = t[i]
 				if type(v) == "string" then
+					mem[v] = nil -- ส่งเควสแล้ว ไม่ต้องกลับไปอีก
 					for _, m in ipairs(goblins()) do
 						if m:GetAttribute("UID") == v then
 							state[m] = { pos = m:GetPivot().Position, tries = 0, done = true,
@@ -1898,7 +1904,32 @@ do
 	}, head), 4)
 	local title = label(head, "Goblin Auto", 14, C.text, Enum.Font.GothamBold)
 	title.Position = UDim2.fromOffset(28, 0)
-	title.Size = UDim2.new(1, -130, 1, 0)
+	title.Size = UDim2.fromOffset(90, 34)
+	title.TextSize = 13
+
+	-- countdown to the next goblin round (counts from the last spawn alert; "~" = estimated, an alert was missed)
+	local cd = label(head, "next --:--", 11, C.sub, Enum.Font.Code, Enum.TextXAlignment.Right)
+	cd.Position = UDim2.fromOffset(118, 0)
+	cd.Size = UDim2.fromOffset(84, 34)
+	task.spawn(function()
+		while running do
+			pcall(function()
+				local si = spawnInfo
+				if not si then
+					cd.Text = "next --:--"
+					cd.TextColor3 = C.sub
+					return
+				end
+				local gap = CFG.spawnEvery
+				local r, est = si.at + gap - os.clock(), false
+				if r < 0 then est = true; r = r % gap end
+				r = math.floor(r)
+				cd.Text = ("next %s%d:%02d"):format(est and "~" or "", math.floor(r / 60), r % 60)
+				cd.TextColor3 = est and C.sub or (r <= 20 and C.on or C.text)
+			end)
+			task.wait(0.25)
+		end
+	end)
 
 	local autoBtn
 	local function paintAuto()
@@ -2047,10 +2078,34 @@ do
 		end
 	end
 
-	---------------------------------------------------- tab: Goblins (live list, tap = warp)
+	---------------------------------------------------- tab: Goblins (grouped by island, tap = warp)
 	do
 		local seenUid, seenCount, shown = {}, 0, {}
-		local warping, rowModel = false, {}
+		local warping, rowModel, headModel = false, {}, {}
+
+		local function warpIsland(name, p)
+			if warping then return end
+			warping = true
+			task.spawn(function()
+				setStatus("tp: " .. name)
+				pcall(goTo, CFrame.new(p))
+				setStatus("idle")
+				warping = false
+			end)
+		end
+
+		-- nearest known island point (flat distance); too far from everything = unknown
+		local function islandOf(p)
+			local bp, bn, bd
+			local function try(name, v)
+				local d = math.sqrt((v.X - p.X) ^ 2 + (v.Z - p.Z) ^ 2)
+				if not bd or d < bd or (d == bd and #name > #bn) then bp, bn, bd = v, name, d end
+			end
+			for name, v in pairs(CFG.islandPos) do try(name, v) end
+			for name, v in pairs(islandCache) do try(name, v) end
+			if bd and bd <= 600 then return bn, bp end
+			return nil
+		end
 
 		local count = label(pGob, "0 goblins", 11, C.sub)
 		count.Size = UDim2.new(1, -92, 0, 24)
@@ -2069,23 +2124,56 @@ do
 		posBtn.Size = UDim2.fromOffset(84, 24)
 		posBtn.Position = UDim2.new(1, -90, 0, 0)
 
-		local sc = scroller(pGob, 30)
+		-- last "goblins have spawned at X!" alert; tap = fly to that island
+		local banner = button(pGob, "no spawn alert yet", function()
+			local si = spawnInfo
+			if si and si.pos then warpIsland(si.name, si.pos) end
+		end, C.card)
+		banner.Position = UDim2.fromOffset(0, 26)
+		banner.Size = UDim2.new(1, -8, 0, 22)
+		banner.TextSize = 11
+		banner.TextXAlignment = Enum.TextXAlignment.Left
+		banner.TextTruncate = Enum.TextTruncate.AtEnd
+		mk("UIPadding", { PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8) }, banner)
+
+		local sc = scroller(pGob, 54)
 		mk("UIListLayout", { Padding = UDim.new(0, 4), SortOrder = Enum.SortOrder.LayoutOrder }, sc)
 		local empty = label(sc, "no goblins loaded", 11, C.sub, Enum.Font.Code)
-		empty.Size = UDim2.new(1, -8, 0, 22)
+		empty.Size = UDim2.new(1, -8, 0, 34)
+		empty.TextWrapped = true
+		empty.TextYAlignment = Enum.TextYAlignment.Top
 		empty.Visible = false
 
-		local rows = {}
-		local function row(i)
+		local heads, rows = {}, {}
+		local function head(i) -- island header row (tap = fly to the island)
+			if heads[i] then return heads[i] end
+			local b = mk("TextButton", {
+				Size = UDim2.new(1, -8, 0, 26), BackgroundColor3 = C.hover, BorderSizePixel = 0, Text = "",
+			}, sc)
+			round(b, 8)
+			local l = label(b, "", 12, C.text, Enum.Font.GothamBold)
+			l.Position = UDim2.fromOffset(10, 0)
+			l.Size = UDim2.new(0.6, -10, 1, 0)
+			l.TextTruncate = Enum.TextTruncate.AtEnd
+			local r = label(b, "", 10, C.sub, Enum.Font.GothamMedium, Enum.TextXAlignment.Right)
+			r.Position = UDim2.fromScale(0.6, 0)
+			r.Size = UDim2.new(0.4, -10, 1, 0)
+			b.Activated:Connect(function()
+				local hm = headModel[b]
+				if hm then warpIsland(hm.name, hm.pos) end
+			end)
+			heads[i] = { b = b, l = l, r = r }
+			return heads[i]
+		end
+		local function row(i) -- goblin row (tap = warp to it)
 			if rows[i] then return rows[i] end
 			local b = mk("TextButton", {
-				Size = UDim2.new(1, -8, 0, 30), BackgroundColor3 = C.card, BorderSizePixel = 0,
-				Text = "", LayoutOrder = i,
+				Size = UDim2.new(1, -8, 0, 30), BackgroundColor3 = C.card, BorderSizePixel = 0, Text = "",
 			}, sc)
 			round(b, 8)
 			local l = label(b, "", 12, C.text)
-			l.Position = UDim2.fromOffset(10, 0)
-			l.Size = UDim2.new(0.5, -10, 1, 0)
+			l.Position = UDim2.fromOffset(16, 0)
+			l.Size = UDim2.new(0.5, -16, 1, 0)
 			local r = label(b, "", 11, C.text, Enum.Font.GothamBold, Enum.TextXAlignment.Right)
 			r.Position = UDim2.fromScale(0.5, 0)
 			r.Size = UDim2.new(0.5, -10, 1, 0)
@@ -2144,25 +2232,73 @@ do
 					table.sort(list, function(a, b) return a.o < b.o end) -- first-seen order: rows don't jump while walking
 					shown = list
 
-					for i = 1, math.max(#rows, math.min(#list, 15)) do
-						local g, rw = list[i], row(i)
-						if g and i <= 15 then
-							local far = not g.m:FindFirstChildWhichIsA("BasePart", true)
-							local s = state[g.m]
-							local st = stat(g.m)
-							rw.l.Text = ("%d.  %dm%s"):format(i, math.floor(g.d), far and "  far" or "")
-							rw.l.TextTransparency = (s and s.done) and 0.5 or 0
-							rw.r.Text = st
-							rw.r.TextColor3 = statColor(st)
-							rw.b.Visible = true
-							rowModel[rw.b] = g
-						else
-							rw.b.Visible = false
-							rowModel[rw.b] = nil
+					-- group by island (group order = first time one of its goblins was seen)
+					local groups, order = {}, {}
+					for _, g in ipairs(list) do
+						local name, ipos = islandOf(g.p)
+						local key = name or "?"
+						local gr = groups[key]
+						if not gr then
+							gr = { name = name or "Unknown island", pos = ipos, items = {}, first = g.o }
+							groups[key] = gr
+							order[#order + 1] = gr
+						end
+						gr.items[#gr.items + 1] = g
+					end
+					table.sort(order, function(a, b) return a.first < b.first end)
+
+					local ord, hi, ri = 0, 0, 0
+					for _, gr in ipairs(order) do
+						hi = hi + 1
+						local h = head(hi)
+						ord = ord + 1
+						h.b.LayoutOrder = ord
+						h.l.Text = gr.name
+						h.r.Text = ("%d goblin%s"):format(#gr.items, #gr.items == 1 and "" or "s")
+						h.b.Visible = true
+						headModel[h.b] = gr.pos and { name = gr.name, pos = gr.pos } or nil
+						for idx, g in ipairs(gr.items) do
+							if ri < 20 then
+								ri = ri + 1
+								local rw = row(ri)
+								ord = ord + 1
+								rw.b.LayoutOrder = ord
+								local far = not g.m:FindFirstChildWhichIsA("BasePart", true)
+								local s = state[g.m]
+								local st = stat(g.m)
+								rw.l.Text = ("%d.  %dm%s"):format(idx, math.floor(g.d), far and "  far" or "")
+								rw.l.TextTransparency = (s and s.done) and 0.5 or 0
+								rw.r.Text = st
+								rw.r.TextColor3 = statColor(st)
+								rw.b.Visible = true
+								rowModel[rw.b] = g
+							end
 						end
 					end
+					for i = hi + 1, #heads do
+						heads[i].b.Visible = false
+						headModel[heads[i].b] = nil
+					end
+					for i = ri + 1, #rows do
+						rows[i].b.Visible = false
+						rowModel[rows[i].b] = nil
+					end
+
+					local si = spawnInfo
+					if si then
+						local age = math.floor(os.clock() - si.at)
+						local ago = age < 90 and (age .. "s") or (math.floor(age / 60) .. "m")
+						banner.Text = ("last spawn: %s · %s ago"):format(si.name, ago)
+						banner.TextColor3 = si.pos and C.on or C.sub
+					else
+						banner.Text = "no spawn alert yet"
+						banner.TextColor3 = C.sub
+					end
+					empty.Text = (#list == 0 and si and si.pos)
+						and "none streamed in yet - tap the banner to fly to the island"
+						or "no goblins loaded"
 					empty.Visible = #list == 0
-					count.Text = ("%d goblins · seen %d"):format(#list, seenCount)
+					count.Text = ("%d goblins · %d islands"):format(#list, #order)
 				end)
 				task.wait(0.5)
 			end
@@ -2290,6 +2426,7 @@ end
 
 -- วาร์ปไปเกาะที่แจ้งเตือนบอก แล้วรอให้ goblin stream เข้า (ใช้ goTo ของส่วน UI)
 local function warpToSpawn(pw)
+	mem["island"] = { pos = pw.cf.Position, at = os.clock(), name = pw.name }
 	setStatus("warp: " .. pw.name)
 	log("WARP -> " .. pw.name)
 	if not goTo(pw.cf) then return false end
@@ -2301,6 +2438,89 @@ local function warpToSpawn(pw)
 	end
 	log("WARP: no goblins loaded near " .. pw.name)
 	return false
+end
+
+local retLast, retStrike, retBlock = 0, 0, 0
+
+task.spawn(function() -- จำพิกัดไว้ตลอด โมเดลหายตอน stream ออก แต่พิกัดยังอยู่
+	while running do
+		pcall(function()
+			for _, m in ipairs(goblins()) do
+				local uid = tostring(m:GetAttribute("UID") or m.Name)
+				local s = state[m]
+				if (s and s.done) or not wantsModel(m) then
+					mem[uid] = nil
+				else
+					mem[uid] = { pos = m:GetPivot().Position, at = os.clock(), name = m.Name }
+				end
+			end
+		end)
+		task.wait(0.5)
+	end
+end)
+
+conns[#conns + 1] = lp.CharacterAdded:Connect(function()
+	needReturn = os.clock()
+	if os.clock() - retLast < 20 then -- ตายซ้ำทันทีหลังวาปกลับ: กันลูปตาย
+		retStrike = retStrike + 1
+		if retStrike >= 3 then
+			retStrike, retBlock = 0, os.clock() + 90
+			log("RETURN: died 3x within 20s of warping - pausing returns for 90s")
+		end
+	else
+		retStrike = 0
+	end
+end)
+
+local function returnToGoblins()
+	if not needReturn then return false end
+	local age = os.clock() - needReturn
+	needReturn = false
+	if not CFG.returnOnDeath or age > 180 then return false end
+	if os.clock() < retBlock then
+		log("RETURN paused")
+		return false
+	end
+
+	local bestK, best
+	for k, e in pairs(mem) do
+		if os.clock() - e.at > CFG.returnWindow then
+			mem[k] = nil
+		elseif not best or e.at > best.at then
+			bestK, best = k, e
+		end
+	end
+	if not best then return false end
+	if not waitAlive(30) then return false end
+
+	local h = hrpOf()
+	if h and (h.Position - best.pos).Magnitude < 60 then return true end -- อยู่ใกล้แล้ว
+
+	setStatus("return: " .. tostring(best.name))
+	log(("RETURN after death -> %s (%.0f, %.0f, %.0f)"):format(
+		tostring(best.name), best.pos.X, best.pos.Y, best.pos.Z))
+	retLast = os.clock()
+	working = true
+	activity()
+	touch(90)
+	local ok, err = pcall(goTo, CFrame.new(best.pos))
+	if not ok then log("ERR return " .. tostring(err)) end
+
+	local got, t0 = false, os.clock()
+	while running and os.clock() - t0 < 6 do -- รอ goblin stream เข้า
+		task.wait(0.2)
+		touch(60)
+		if #fresh() > 0 then got = true break end
+	end
+	working = false
+	activity()
+	local hh = hrpOf()
+	if hh then hh.Anchored = false end
+	if not got then
+		log("RETURN: no goblins loaded here - dropping this spot")
+		mem[bestK] = nil
+	end
+	return got
 end
 
 -- ตายแล้ว: เควสที่รับค้างไว้ (ยังไม่ได้ส่ง) ให้กลับไปคุยกับ goblin ใหม่ทุกตัว เพราะเควสอาจถูกรีเซ็ต
@@ -2358,6 +2578,7 @@ local function runOne(m, s, phase)
 			startCool(s, m.Name, "died " .. CFG.deathCoolAfter .. "x here")
 		end
 		waitAlive(25)
+		pcall(returnToGoblins)
 	elseif not ok then
 		log("ERR " .. tostring(res))
 		unstick("error in handleGoblin")
@@ -2387,6 +2608,7 @@ local function runOne(m, s, phase)
 end
 
 local function tickOnce()
+	pcall(returnToGoblins)
 	local list = fresh()
 	-- เพิ่งมีแจ้งเตือน spawn และไม่มี goblin ค้างให้ทำแล้ว -> ไปเกาะนั้น
 	if #list == 0 and pendingWarp then
@@ -2645,8 +2867,10 @@ do
 		if name == "" or (name == lastName and os.clock() - lastAt < 10) then return end
 		lastName, lastAt = name, os.clock()
 		log("SPAWN " .. name)
+		local okC, p = pcall(findCoords, name)
+		if not okC then p = nil end
+		spawnInfo = { name = name, at = os.clock(), pos = p }
 		if not CFG.warpOnSpawn then return end
-		local p = findCoords(name)
 		if not p then
 			log("NOTE: no coords for '" .. name .. "' - add it to CFG.islandPos")
 			return
