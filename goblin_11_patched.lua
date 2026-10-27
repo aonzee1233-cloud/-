@@ -65,12 +65,13 @@ local CFG = {
 	levels = { easy = true, normal = false, hard = false, extreme = false, ultimate = false },
 	fallbackDown = true,     -- goblin ไม่มีระดับที่เลือก -> ลงไปใช้ระดับต่ำกว่าที่มี
 	quests = { chat = true, dance = true, jump = true, walk = true, guess = true, insult = false },
-	scanOnJoin = true,       -- เข้าเซิฟใหม่: ไล่ขอ stream ทีละเกาะเพื่อหา goblin โดยไม่ต้องรอแจ้งเตือน
+	scanOnJoin = true,       -- เข้าเซิฟใหม่: ไล่ขอ stream ทีละเกาะเพื่อหา goblin โดยไม่ต้องรอแจ้งเตือน (เปิด/ปิดได้ที่แท็บ Main > Scan islands)
 	watchdog = true,
 	failCool = 40,           -- goblin ที่ทำไม่สำเร็จครบ 4 ครั้ง พักกี่วินาที (x2 ทุกรอบ สูงสุด 300) แล้วไปหาตัวอื่นก่อน
 	returnOnDeath = true,  -- ตายแล้วเกิดไกล: วาปกลับไปหา goblin ที่ยังค้างอยู่
 	returnWindow = 600,    -- จำตำแหน่ง goblin ไว้กี่วินาทีนับจากเห็นครั้งสุดท้าย
 	hardResetAfter = 4,      -- ซ่อมแบบเบากี่รอบติดแล้วยังไม่หาย -> รีเซ็ตตัวละคร (0 = ปิด)
+	hallowDeck = Vector3.new(381, 142, 384), -- ดาดฟ้าเรือ Reaping Dutchman ที่ Moosewood: ยืนตรงนี้คุยกับกัปตันแล้วเลือก Set sail! ไป Caustic Hallow (ที่อยู่ของ Beatrix)
 	islandPos = {
 		["Moosewood"]       = Vector3.new(380, 135, 234),
 		["Roslit Bay"]      = Vector3.new(-1473, 133, 708),
@@ -1366,15 +1367,23 @@ local function doWalk2(o)
 	return done
 end
 
+local witchPos      -- where Beatrix stood the last time she was loaded
+local ensureHallow  -- defined after goTo(): sails to the Halloween area if the Witch is not there yet
+
 local function findWitch()
 	local w = workspace:FindFirstChild("world")
 	local n = w and w:FindFirstChild("npcs")
 	local f = n and n:FindFirstChild("fihfrigh")
-	return f and f:FindFirstChild("Witch")
+	local m = f and f:FindFirstChild("Witch")
+	if m and m:FindFirstChildWhichIsA("BasePart", true) then
+		local ok, cf = pcall(function() return m:GetPivot() end)
+		if ok and cf then witchPos = cf.Position end
+	end
+	return m
 end
 
 local function doInsult(o)
-	local witch = findWitch()
+	local witch = ensureHallow()
 	if not (witch and DI) then
 		log("NOTE: Witch / DialogInteract not found")
 		return false
@@ -1387,6 +1396,10 @@ local function doInsult(o)
 		if a then sawHud = true elseif sawHud then return true end -- บรรทัด HUD หายไป = เสร็จ
 		if a and a >= b then return true end
 		if not sawHud and i > need then return true end
+		if not witch.Parent then
+			witch = ensureHallow()
+			if not witch then return false end
+		end
 		if not tpTo(witch) or not openDialog(witch) then return false end
 		local cfg = dialogCfg[witch]
 		local ch = cfg and cfg.dialog and cfg.dialog[1] and cfg.dialog[1].choices
@@ -1777,11 +1790,118 @@ local function dumpIslands()
 	end
 end
 
+---------------------------------------------------------------- Halloween area (Caustic Hallow)
+-- Beatrix (Witch) and the trick-or-treat houses only exist over there. Way in: stand on the Reaping
+-- Dutchman docked at Moosewood, talk to the Dutchman Captain, pick "Set sail!". The way back is a normal teleport.
+local function dutchmanCaptain()
+	local w = workspace:FindFirstChild("world")
+	local m = w and w:FindFirstChild("map")
+	local f = m and m:FindFirstChild("Fischfright26")
+	local g = f and f:FindFirstChild("Green")
+	local r = g and g:FindFirstChild("Reaping Dutchman")
+	return r and r:FindFirstChild("Dutchman Captain")
+end
+
+local function witchLoaded()
+	local w = findWitch()
+	if w and w:FindFirstChildWhichIsA("BasePart", true) then return w end
+end
+
+local function waitWitch(secs)
+	local t0 = os.clock()
+	while running and os.clock() - t0 < secs do
+		touch(60)
+		local w = witchLoaded()
+		if w then return w end
+		task.wait(0.3)
+	end
+end
+
+local hallowAt = 0 -- os.clock() of the last successful sail
+
+ensureHallow = function()
+	local w = witchLoaded()
+	if w then return w end
+
+	-- sailed earlier: she is probably just streamed out -> fly back to where she stood
+	if witchPos and os.clock() - hallowAt < 900 then
+		log(("HALLOW: Witch not loaded - going back to (%.0f, %.0f, %.0f)"):format(witchPos.X, witchPos.Y, witchPos.Z))
+		goTo(CFrame.new(witchPos))
+		w = waitWitch(6)
+		if w then return w end
+	end
+
+	for round = 1, 2 do
+		if not running then return nil end
+		setStatus("sail to Hallow")
+		local cap = dutchmanCaptain()
+		if not cap then
+			log("HALLOW: Dutchman not loaded - going to the deck")
+			if not goTo(CFrame.new(CFG.hallowDeck)) then return nil end
+			local t0 = os.clock()
+			while running and not dutchmanCaptain() and os.clock() - t0 < 8 do
+				touch(60)
+				task.wait(0.3)
+			end
+			cap = dutchmanCaptain()
+			if not cap then
+				log("NOTE: Dutchman Captain not found - is the ship docked at Moosewood?")
+				return nil
+			end
+		end
+		if openDialog(cap) then
+			local h = hrpOf()
+			if h then h.Anchored = false end
+			-- 1) the on-screen "Set sail!" button  2) key 1 (the option is numbered "1.")  3) DialogInteract(1, 1)
+			local methods = {
+				function()
+					for _, g in ipairs(texts(false)) do
+						if clean(g.Text):lower():find("set sail", 1, true) then
+							local b = clickTarget(g)
+							if b then
+								local how = press(b)
+								if how ~= "none" then return "click " .. how end
+							end
+						end
+					end
+				end,
+				function()
+					tap(Enum.KeyCode.One, 0.15)
+					return "key 1"
+				end,
+				function()
+					if not DI then return end
+					local ok, res = pcall(function() return DI:InvokeServer(1, 1) end)
+					return "DialogInteract(1, 1) -> " .. tostring(ok) .. " " .. fmt(res)
+				end,
+			}
+			for _, method in ipairs(methods) do
+				local ok, how = pcall(method)
+				if ok and how then
+					log("HALLOW: set sail via " .. how)
+					w = waitWitch(10)
+					if w then
+						hallowAt = os.clock()
+						log("HALLOW: arrived, Witch loaded")
+						return w
+					end
+				end
+			end
+			log("NOTE: sailed but the Witch never loaded (round " .. round .. ")")
+		else
+			log("NOTE: could not open the Dutchman dialog (round " .. round .. ")")
+		end
+		task.wait(1)
+	end
+	return nil
+end
+
 ---------------------------------------------------------------- scan islands (หา goblin ตอนเข้าเซิฟใหม่ ไม่ต้องรอแจ้งเตือน)
 -- ขอให้เกม stream พื้นที่รอบเกาะทีละเกาะ (ไม่ย้ายตัวละคร) แล้วดูว่า goblin โผล่ที่เกาะไหน
 local scanning = false
-local function scanIslands()
+local function scanIslands(manual)
 	if scanning then return end
+	if not manual and not CFG.scanOnJoin then return end -- ปุ่ม Scan islands ปิดอยู่
 	scanning = true
 	local found
 	local ok, err = pcall(function()
@@ -1806,6 +1926,7 @@ local function scanIslands()
 		log("SCAN islands: " .. #cands .. " spots")
 		for i, c in ipairs(cands) do
 			if not running then break end
+			if not manual and not CFG.scanOnJoin then log("SCAN: stopped (toggle off)") break end
 			setStatus(("scan %d/%d: %s"):format(i, #cands, c.name))
 			pcall(function() lp:RequestStreamAroundAsync(c.pos, 4) end)
 			task.wait(0.4)
@@ -2163,18 +2284,23 @@ do
 		switchRow(sc, 4, "Talk to goblins", function() return CFG.talk end, function(v) CFG.talk = v end)
 		switchRow(sc, 5, "Warp on spawn", function() return CFG.warpOnSpawn end, function(v) CFG.warpOnSpawn = v end)
 		switchRow(sc, 6, "ESP + distance", function() return CFG.esp end, function(v) CFG.esp = v end)
+		switchRow(sc, 7, "Scan islands", function() return CFG.scanOnJoin end, function(v)
+			CFG.scanOnJoin = v
+			if v and running and #fresh() == 0 then task.spawn(scanIslands) end -- เปิดแล้วไม่มี goblin ให้เห็น -> สแกนเลย
+			if not v then setStatus("island scan OFF") end
+		end)
 
-		section("QUESTS  (OFF = skip)", 7)
+		section("QUESTS  (OFF = skip)", 8)
 		local function qrow(order, key, text)
 			switchRow(sc, order, text, function() return CFG.quests[key] ~= false end,
 				function(v) CFG.quests[key] = v end)
 		end
-		qrow(8, "chat", "Type in chat")
-		qrow(9, "dance", "Dance")
-		qrow(10, "jump", "Jump")
-		qrow(11, "walk", "Walk")
-		qrow(12, "guess", "Quiz / guess")
-		qrow(13, "insult", "Insult Beatrix")
+		qrow(9, "chat", "Type in chat")
+		qrow(10, "dance", "Dance")
+		qrow(11, "jump", "Jump")
+		qrow(12, "walk", "Walk")
+		qrow(13, "guess", "Quiz / guess")
+		qrow(14, "insult", "Insult Beatrix")
 	end
 
 	---------------------------------------------------- tab: Warp (islands)
@@ -2247,7 +2373,7 @@ do
 		-- last "goblins have spawned at X!" alert; tap = fly to that island
 		local banner = button(pGob, "no spawn alert yet", function()
 			local si = spawnInfo
-			if si and si.pos then warpIsland(si.name, si.pos) else task.spawn(scanIslands) end
+			if si and si.pos then warpIsland(si.name, si.pos) else task.spawn(scanIslands, true) end
 		end, C.card)
 		banner.Position = UDim2.fromOffset(0, 26)
 		banner.Size = UDim2.new(1, -8, 0, 22)
@@ -2444,7 +2570,13 @@ do
 		end, C.on)
 		tool(2, "Copy report", function(b)
 			if setclipboard then
-				setclipboard(table.concat(lines, "\n"))
+				local tail, n = {}, 0 -- เอาเฉพาะท้าย log (ล่าสุด) ไม่งั้นรายงานยาวจะโดนตัดตรงท้าย
+				for i = #lines, 1, -1 do
+					n = n + #lines[i] + 1
+					if n > 8000 then break end
+					table.insert(tail, 1, lines[i])
+				end
+				setclipboard(table.concat(tail, "\n"))
 				flash(b, "Copied!")
 			else
 				warn("executor has no setclipboard")
