@@ -219,7 +219,7 @@ local function tpTo(model)
 		end
 		cf = model:GetPivot()
 	end
-	hrp.CFrame = standCF(model)
+	hrp.CFrame = CFrame.new(model:GetPivot().Position + Vector3.new(0, 3, 0))
 	hrp.AssemblyLinearVelocity = Vector3.zero
 	task.wait(0.5)
 	return model.Parent ~= nil
@@ -1619,42 +1619,72 @@ end, 156)
 paint(espBtn, CFG.esp)
 
 -- คอลัมน์ 3: วาปไปเกาะ (goblin โหลดแล้ว Auto จะหยิบเอง)
+local function landAt(x, z, y, maxDy, rp)
+	local skip, best = { lp.Character }, nil
+	for _ = 1, 14 do
+		rp.FilterDescendantsInstances = skip
+		local hit = workspace:Raycast(Vector3.new(x, y + maxDy + 10, z),
+			Vector3.new(0, -(maxDy * 2 + 20), 0), rp)
+		if not hit then break end
+		local inst = hit.Instance
+		local d = math.abs(hit.Position.Y - y)
+		if inst:IsA("Terrain") then
+			if hit.Material ~= Enum.Material.Water and d <= maxDy and (not best or d < best.d) then
+				best = { pos = hit.Position, inst = inst, d = d }
+			end
+			break -- ใต้ดิน/ผิวน้ำไม่ต้องหาต่อ
+		end
+		local mdl = inst:FindFirstAncestorOfClass("Model")
+		local isChar = mdl and mdl:FindFirstChildOfClass("Humanoid") ~= nil
+		if not isChar and inst.Transparency < 0.95 and d <= maxDy and (not best or d < best.d) then
+			best = { pos = hit.Position, inst = inst, d = d }
+		end
+		skip[#skip + 1] = inst
+	end
+	return best
+end
+
+-- ไล่หาพื้นเป็นวง: จุดตรงๆ ก่อน แล้วค่อยขยายออก 15/30/50/80/120 stud
+local function findLand(p, maxDy, rp)
+	for _, r in ipairs({ 0, 15, 30, 50, 80, 120 }) do
+		for i = 0, (r == 0 and 0 or 7) do
+			local a = math.rad(i * 45)
+			local f = landAt(p.X + math.cos(a) * r, p.Z + math.sin(a) * r, p.Y, maxDy, rp)
+			if f then return f end
+		end
+	end
+end
+
 local function goTo(cf)
 	local hrp = hrpOf()
 	if not hrp then return false end
 	local p = cf.Position
-	pcall(function() lp:RequestStreamAroundAsync(p) end)
-	hrp.Anchored = true
-	hrp.CFrame = CFrame.new(p + Vector3.new(0, 60, 0))
-	hrp.AssemblyLinearVelocity = Vector3.zero
-	task.wait(1.5)
-	-- หาพื้นใกล้ความสูงที่เซฟไว้ (p.Y) เท่านั้น ข้ามพาร์ทมองไม่เห็น/ไม่ชน (โซน, ฮิตบ็อกซ์, ท้องฟ้า)
-	-- เอาจุดที่ใกล้ p.Y ที่สุด ไม่งั้นจะไปยืนบนพาร์ทลอยฟ้า
 	local rp = RaycastParams.new()
 	rp.FilterType = Enum.RaycastFilterType.Exclude
 	rp.RespectCanCollide = true
-	local ground
-	for _ = 1, 8 do
-		local skip, best = { lp.Character }, nil
-		for _ = 1, 12 do
-			rp.FilterDescendantsInstances = skip
-			local hit = workspace:Raycast(p + Vector3.new(0, 80, 0), Vector3.new(0, -300, 0), rp)
-			if not hit then break end
-			local inst = hit.Instance
-			if inst:IsA("Terrain") then -- ดินหรือผิวน้ำ: ใต้นี้ไม่ต้องหาต่อ
-				if not best or math.abs(hit.Position.Y - p.Y) < math.abs(best.Y - p.Y) then best = hit.Position end
-				break
-			end
-			if inst.Transparency < 0.95
-				and (not best or math.abs(hit.Position.Y - p.Y) < math.abs(best.Y - p.Y)) then
-				best = hit.Position
-			end
-			skip[#skip + 1] = inst
-		end
-		if best then ground = best break end
+
+	pcall(function() lp:RequestStreamAroundAsync(p) end)
+	hrp.Anchored = true
+	hrp.CFrame = CFrame.new(p + Vector3.new(0, 30, 0))
+	hrp.AssemblyLinearVelocity = Vector3.zero
+	task.wait(1.2)
+
+	local found
+	for attempt = 1, 4 do -- 3 รอบแรกเข้ม (±25) รอ terrain stream, รอบสุดท้ายหลวม (±80)
+		found = findLand(p, attempt <= 3 and 25 or 80, rp)
+		if found then break end
 		task.wait(0.5)
 	end
-	hrp.CFrame = CFrame.new(ground and (ground + Vector3.new(0, 5, 0)) or (p + Vector3.new(0, 8, 0)))
+
+	if found then
+		log(("GOTO y=%.0f (saved %.0f, off %.0f) on %s"):format(
+			found.pos.Y, p.Y, found.pos.Y - p.Y, found.inst:GetFullName()))
+		hrp.CFrame = CFrame.new(found.pos + Vector3.new(0, 5, 0))
+	else
+		log(("NOTE: no solid ground near %.0f, %.0f, %.0f - use Mark spot"):format(p.X, p.Y, p.Z))
+		hrp.CFrame = CFrame.new(p + Vector3.new(0, 6, 0))
+	end
+	hrp.AssemblyLinearVelocity = Vector3.zero
 	hrp.Anchored = false
 	return true
 end
@@ -1801,6 +1831,198 @@ do
 			task.wait(0.3)
 		end
 		for m in pairs(esp) do drop(m) end
+	end)
+end
+
+---------------------------------------------------------------- panel: goblin กี่ตัว + พิกัด (แบบ v8)
+do
+	local UIS = game:GetService("UserInputService")
+	local seenUid, seenCount, shown = {}, 0, {}
+	local warping, rowModel = false, {}
+	local W, H = 250, 190
+
+	local panel = Instance.new("Frame")
+	panel.Size = UDim2.fromOffset(W, H)
+	panel.Position = UDim2.fromOffset(12, 70)
+	panel.BackgroundColor3 = Color3.fromRGB(20, 22, 28)
+	panel.BackgroundTransparency = 0.1
+	panel.BorderSizePixel = 0
+	panel.Parent = gui
+	Instance.new("UICorner", panel).CornerRadius = UDim.new(0, 8)
+
+	local bar = Instance.new("TextLabel")
+	bar.Size = UDim2.new(1, -76, 0, 26)
+	bar.Position = UDim2.fromOffset(8, 0)
+	bar.BackgroundTransparency = 1
+	bar.TextColor3 = Color3.new(1, 1, 1)
+	bar.Font = Enum.Font.GothamBold
+	bar.TextSize = 12
+	bar.TextXAlignment = Enum.TextXAlignment.Left
+	bar.Text = "goblins 0"
+	bar.Active = true
+	bar.Parent = panel
+
+	local function tinyBtn(text, xOff)
+		local b = Instance.new("TextButton")
+		b.Size = UDim2.fromOffset(30, 20)
+		b.Position = UDim2.new(1, xOff, 0, 3)
+		b.BackgroundColor3 = Color3.fromRGB(44, 48, 60)
+		b.TextColor3 = Color3.new(1, 1, 1)
+		b.Font = Enum.Font.GothamMedium
+		b.TextSize = 11
+		b.Text = text
+		b.Parent = panel
+		return b
+	end
+	local posBtn, foldBtn = tinyBtn("POS", -68), tinyBtn("–", -34)
+
+	local sc = Instance.new("ScrollingFrame")
+	sc.Size = UDim2.new(1, -12, 1, -32)
+	sc.Position = UDim2.fromOffset(6, 28)
+	sc.BackgroundTransparency = 1
+	sc.BorderSizePixel = 0
+	sc.ScrollBarThickness = 3
+	sc.AutomaticCanvasSize = Enum.AutomaticSize.Y
+	sc.CanvasSize = UDim2.new()
+	sc.Parent = panel
+
+	local layout = Instance.new("UIListLayout")
+	layout.Padding = UDim.new(0, 3)
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
+	layout.Parent = sc
+
+	local empty = Instance.new("TextLabel")
+	empty.Size = UDim2.new(1, 0, 0, 20)
+	empty.BackgroundTransparency = 1
+	empty.TextColor3 = Color3.fromRGB(140, 146, 160)
+	empty.Font = Enum.Font.Code
+	empty.TextSize = 11
+	empty.Text = "(none loaded)"
+	empty.Visible = false
+	empty.Parent = sc
+
+	local rowBtns = {}
+	local function rowBtn(i)
+		if rowBtns[i] then return rowBtns[i] end
+		local b = Instance.new("TextButton")
+		b.Size = UDim2.new(1, -6, 0, 26)
+		b.BackgroundColor3 = Color3.fromRGB(44, 48, 60)
+		b.TextColor3 = Color3.fromRGB(235, 237, 242)
+		b.Font = Enum.Font.Code
+		b.TextSize = 11
+		b.TextXAlignment = Enum.TextXAlignment.Left
+		b.LayoutOrder = i
+		b.Parent = sc
+		Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
+		Instance.new("UIPadding", b).PaddingLeft = UDim.new(0, 6)
+		b.Activated:Connect(function()
+			local g = rowModel[b]
+			if not g or warping then return end
+			warping = true
+			task.spawn(function()
+				local ok, res = pcall(tpTo, g.m)
+				if not (ok and res) then -- โมเดลไม่โหลด: ลงที่พิกัดที่เก็บไว้
+					local h = hrpOf()
+					if h then
+						h.Anchored = false
+						h.CFrame = CFrame.new(g.p + Vector3.new(0, 3, 0))
+						h.AssemblyLinearVelocity = Vector3.zero
+					end
+				end
+				log("MANUAL WARP -> " .. g.m.Name .. " " .. g.uid)
+				warping = false
+			end)
+		end)
+		rowBtns[i] = b
+		return b
+	end
+
+	local folded = false
+	foldBtn.Activated:Connect(function()
+		folded = not folded
+		sc.Visible = not folded
+		panel.Size = UDim2.fromOffset(W, folded and 26 or H)
+		foldBtn.Text = folded and "+" or "–"
+	end)
+
+	posBtn.Activated:Connect(function() -- ก๊อปพิกัดแบบ v8: ["uid"]=Vector3.new(x,y,z),
+		local t = {}
+		for _, g in ipairs(shown) do
+			t[#t + 1] = ('["%s"]=Vector3.new(%.1f,%.1f,%.1f),'):format(g.uid, g.p.X, g.p.Y, g.p.Z)
+		end
+		if setclipboard and #t > 0 then
+			setclipboard(table.concat(t, "\n"))
+			posBtn.Text = "OK"
+			task.delay(1, function() posBtn.Text = "POS" end)
+		end
+	end)
+
+	do -- ลากแผง
+		local dragging, dragStart, startPos
+		bar.InputBegan:Connect(function(i)
+			if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+				dragging, dragStart, startPos = true, i.Position, panel.Position
+				i.Changed:Connect(function()
+					if i.UserInputState == Enum.UserInputState.End then dragging = false end
+				end)
+			end
+		end)
+		conns[#conns + 1] = UIS.InputChanged:Connect(function(i)
+			if dragging and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then
+				local d = i.Position - dragStart
+				panel.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + d.X, startPos.Y.Scale, startPos.Y.Offset + d.Y)
+			end
+		end)
+	end
+
+	local function stat(m)
+		local s = state[m]
+		if not s then return "new" end
+		if s.done then return "done" end
+		local cd = (s.coolUntil or 0) - os.clock()
+		if cd > 0 then return ("rest %ds"):format(math.floor(cd)) end
+		if s.claim then return "claim" end
+		if s.accepted then return "accepted" end
+		if s.tries >= MAXTRY then return "failed" end
+		return "try " .. s.tries
+	end
+
+	task.spawn(function()
+		while running do
+			pcall(function()
+				local hrp = hrpOf()
+				local list = {}
+				for _, m in ipairs(goblins()) do
+					local p = m:GetPivot().Position
+					local uid = tostring(m:GetAttribute("UID") or m.Name)
+					if not seenUid[uid] then seenCount = seenCount + 1; seenUid[uid] = seenCount end
+					list[#list + 1] = { m = m, p = p, uid = uid, o = seenUid[uid],
+						d = hrp and (p - hrp.Position).Magnitude or 0 }
+				end
+				table.sort(list, function(a, b) return a.o < b.o end) -- เรียงตามที่เจอก่อน แถวไม่ขยับเวลาเดิน
+				shown = list
+
+				for i = 1, math.max(#rowBtns, math.min(#list, 15)) do
+					local g, b = list[i], rowBtn(i)
+					if g and i <= 15 then
+						local far = not g.m:FindFirstChildWhichIsA("BasePart", true)
+						local s = state[g.m]
+						b.Text = ("%d. %d,%d,%d | %dm%s | %s"):format(i,
+							math.floor(g.p.X + 0.5), math.floor(g.p.Y + 0.5), math.floor(g.p.Z + 0.5),
+							math.floor(g.d), far and " FAR" or "", stat(g.m))
+						b.TextTransparency = (s and s.done) and 0.5 or 0
+						b.Visible = true
+						rowModel[b] = g
+					else
+						b.Visible = false
+						rowModel[b] = nil
+					end
+				end
+				empty.Visible = #list == 0
+				bar.Text = ("goblins %d · seen %d"):format(#list, seenCount)
+			end)
+			task.wait(0.5)
+		end
 	end)
 end
 
