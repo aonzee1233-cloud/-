@@ -76,16 +76,49 @@ local function scanUI()
     local pg = lp:FindFirstChild("PlayerGui")
     if not pg then return cards, bal end
 
-    local lab, list = {}, {}
+    local lab, list, stockLbls = {}, {}, {}
     for _, o in ipairs(pg:GetDescendants()) do
         if (o:IsA("TextLabel") or o:IsA("TextButton")) and not o:IsDescendantOf(gui) then
             local t = clean(o.Text)
             if t ~= "" then
-                local L = {o = o, t = t, l = t:lower(), price = parsePrice(t)}
+                local lo = t:lower()
+                local L = {o = o, t = t, l = lo, price = parsePrice(t)}
+                L.stock = tonumber(lo:match("stock%D*(%d+)"))
+                if L.stock == nil and lo:find("sold%s*out") then L.stock = 0 end
                 lab[o] = L
                 list[#list + 1] = L
+                if L.stock ~= nil then stockLbls[#stockLbls + 1] = L end
             end
         end
+    end
+
+    -- ตรวจกลุ่ม UI หนึ่งก้อน: ราคาที่ไม่ซ้ำ / ชื่อที่มีคำว่า case / stock
+    local function inspect(root)
+        local prices, nPrice, price = {}, 0, nil
+        local names, nNames, name, nameObj = {}, 0, nil, nil
+        local stock, bad, cnt = nil, false, 0
+        for _, d in ipairs(root:GetDescendants()) do
+            cnt += 1
+            if cnt > 300 then bad = true; break end
+            local X = lab[d]
+            if X then
+                if X.price then
+                    if not prices[X.price] then
+                        prices[X.price] = true; nPrice += 1; price = X.price
+                    end
+                elseif X.stock ~= nil then
+                    stock = X.stock
+                elseif X.l:find("balance", 1, true) or X.l:find("net worth", 1, true) then
+                    bad = true
+                elseif X.l:find("case", 1, true) then
+                    if not names[X.l] then names[X.l] = true; nNames += 1 end
+                    if not name or #X.t < #name then name = X.t; nameObj = X.o end
+                end
+            end
+            if nPrice > 1 then break end
+        end
+        return {nPrice = nPrice, price = price, nNames = nNames, name = name,
+                nameObj = nameObj, stock = stock, bad = bad}
     end
 
     local done = {}
@@ -94,39 +127,27 @@ local function scanUI()
             local cur = L.o.Parent
             for _ = 1, 5 do
                 if not cur or cur == pg or done[cur] then break end
-                local prices, nPrice, name, stock, price = {}, 0, nil, nil, nil
-                local bad, cnt = false, 0
-                for _, d in ipairs(cur:GetDescendants()) do
-                    cnt += 1
-                    if cnt > 150 then bad = true; break end
-                    local X = lab[d]
-                    if X then
-                        if X.price then
-                            if not prices[X.price] then
-                                prices[X.price] = true; nPrice += 1; price = X.price
-                            end
-                        else
-                            local sn = X.l:match("stock%D*(%d+)")
-                            if sn then
-                                stock = tonumber(sn)
-                            elseif X.l:find("sold%s*out") then
-                                stock = 0
-                            elseif X.l:find("balance", 1, true) or X.l:find("net worth", 1, true) then
-                                bad = true
-                            elseif X.l:find("case", 1, true) and (not name or #X.t < #name) then
-                                name = X.t
-                            end
+                local info = inspect(cur)
+                if info.bad or info.nPrice > 1 then break end
+                if info.nPrice == 1 and info.name then
+                    done[cur] = true
+                    local stock = info.stock
+                    -- ป้าย Stock อาจอยู่คนละกลุ่มกับชื่อ/ราคา: ไต่ขึ้นอีก 2 ชั้นตราบที่ยังเป็นการ์ดใบเดียว
+                    if stock == nil then
+                        local up = cur.Parent
+                        for _ = 1, 2 do
+                            if not up or up == pg then break end
+                            local i2 = inspect(up)
+                            if i2.bad or i2.nPrice ~= 1 or i2.nNames ~= 1 then break end
+                            if i2.stock ~= nil then stock = i2.stock; break end
+                            up = up.Parent
                         end
                     end
-                    if nPrice > 1 then break end
-                end
-                if bad or nPrice > 1 then break end
-                if nPrice == 1 and name then
-                    done[cur] = true
-                    local nm = norm(name)
+                    local nm = norm(info.name)
                     local old = cards[nm]
                     if not old or (old.stock == nil and stock ~= nil) then
-                        cards[nm] = {norm = nm, disp = name, stock = stock, price = price, inst = cur.Name}
+                        cards[nm] = {norm = nm, disp = info.name, stock = stock, price = info.price,
+                                     inst = cur.Name, nameObj = info.nameObj}
                     end
                     break
                 end
@@ -135,21 +156,48 @@ local function scanUI()
         end
     end
 
-    -- BALANCE: เอาตัวเลขเงินที่อยู่ใกล้ใต้ป้าย BALANCE ที่สุด
+    -- สำรอง: ยังหา stock ไม่เจอ -> ใช้ตำแหน่งบนจอ (ป้าย Stock อยู่เหนือชื่อกล่อง และซ้อนกันในแนวนอน)
+    for _, c in pairs(cards) do
+        if c.stock == nil and c.nameObj then
+            local np, ns = c.nameObj.AbsolutePosition, c.nameObj.AbsoluteSize
+            local bestD = math.huge
+            for _, S in ipairs(stockLbls) do
+                local sp, ss = S.o.AbsolutePosition, S.o.AbsoluteSize
+                local dyC = (np.Y + ns.Y / 2) - (sp.Y + ss.Y / 2)
+                local overlap = sp.X < np.X + ns.X and np.X < sp.X + ss.X
+                if overlap and dyC > 0 and dyC < math.max(ss.Y * 3, 150) and dyC < bestD then
+                    bestD = dyC; c.stock = S.stock
+                end
+            end
+        end
+    end
+
+    -- BALANCE: ตัวเลขเงินที่อยู่ใกล้ใต้ป้าย BALANCE ที่สุด (เฉพาะที่มองเห็นอยู่ และมากกว่า 0)
+    -- อ่านไม่ได้ = nil -> ข้ามการเช็คเงิน (ไม่บล็อกการเปิด)
+    local function shown(o)
+        local cur = o
+        while cur and cur ~= pg do
+            if cur:IsA("GuiObject") and not cur.Visible then return false end
+            if cur:IsA("ScreenGui") and not cur.Enabled then return false end
+            cur = cur.Parent
+        end
+        return true
+    end
     for _, L in ipairs(list) do
-        if L.l:match("^balance") then
-            local bp, bd = L.o.AbsolutePosition, math.huge
+        if L.l:match("^balance") and shown(L.o) then
+            local bp = L.o.AbsolutePosition
+            local bd = math.huge
             for _, P in ipairs(list) do
-                if P.price then
+                if P.price and P.price > 0 then
                     local pp = P.o.AbsolutePosition
                     local dy = pp.Y - bp.Y
                     if dy > -4 then
                         local d = dy + math.abs(pp.X - bp.X) * 2
-                        if d < bd and d < 600 then bd = d; bal = P.price end
+                        if d < bd and d < 600 and shown(P.o) then bd = d; bal = P.price end
                     end
                 end
             end
-            break
+            if bal then break end
         end
     end
     return cards, bal
@@ -340,7 +388,7 @@ local function paint()
     hideBtn.Text  = hideOn  and "Hide: ON"  or "Hide: OFF";  hideBtn.BackgroundColor3  = hideOn  and ON_C or OFF_C
     quickBtn.Text = quickOn and "Quick: ON" or "Quick: OFF"; quickBtn.BackgroundColor3 = quickOn and ON_C or OFF_C
     flagBtn.Text  = "Flag: "..tostring(flag);                flagBtn.BackgroundColor3  = flag    and ON_C or OFF_C
-    autoBtn.Text  = autoOn and "🎲 Auto Limited: ON" or "Auto Limited: OFF (ใช้กล่องที่เลือก)"
+    autoBtn.Text  = autoOn and "🎲 Auto Limited: ON" or "Auto Limited: OFF"
     autoBtn.TextSize = 11
     autoBtn.BackgroundColor3 = autoOn and ON_C or OFF_C
 end
