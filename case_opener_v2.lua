@@ -17,7 +17,7 @@ local save = function() end
 
 -- ===== โหลดค่าที่เซฟไว้ =====
 local canFile = type(writefile) == "function" and type(readfile) == "function" and type(isfile) == "function"
-local cfg = {cases = {}, sel = {}, amt = "3", thr = "2", skip = false, hide = false, quick = false, flag = false}
+local cfg = {cases = {}, sel = {}, amt = "3", dly = "1", skip = false, hide = false, quick = false, flag = false}
 if canFile and isfile(SAVE_FILE) then
     local ok, d = pcall(function() return HttpService:JSONDecode(readfile(SAVE_FILE)) end)
     if ok and type(d) == "table" then
@@ -181,7 +181,7 @@ addBtn.MouseButton1Click:Connect(function()
 end)
 
 local amtBox=Fld("amt(1-"..MAX_AMT..")",tostring(cfg.amt),182,0,0.5)
-local thrBox=Fld("threads",tostring(cfg.thr),182,0.5,0.5)
+local thrBox=Fld("delay(s)",tostring(cfg.dly),182,0.5,0.5)  -- ช่องขวา = delay วินาที
 
 local ON_C=Color3.fromRGB(0,100,180); local OFF_C=Color3.fromRGB(50,50,50)
 local skipBtn =Btn("Skip: OFF", 210,nil,0,0.5)
@@ -216,7 +216,7 @@ save = function()
     for n in pairs(cBtns) do names[#names+1]=n end
     for n in pairs(selectedCases) do sel[#sel+1]=n end
     table.sort(names); table.sort(sel)
-    local data = {cases=names, sel=sel, amt=amtBox.Text, thr=thrBox.Text,
+    local data = {cases=names, sel=sel, amt=amtBox.Text, dly=thrBox.Text,
                   skip=skipOn, hide=hideOn, quick=quickOn, flag=flag}
     pcall(function() writefile(SAVE_FILE, HttpService:JSONEncode(data)) end)
 end
@@ -281,13 +281,13 @@ goBtn.MouseButton1Click:Connect(function()
     goBtn.Text="■ Stop"; goBtn.BackgroundColor3=Color3.fromRGB(160,40,40)
     sent,okn,total,t0=0,0,0,os.clock()
 
-    local nT  = math.clamp(math.floor(tonumber(thrBox.Text) or 1), 1, 10)
+    local nT  = 1   -- thread เดียว ส่งทีละคำขอ ไม่ซ้อนกัน
     local amt = math.clamp(math.floor(tonumber(amtBox.Text) or 3), 1, MAX_AMT)
 
     -- gap = ระยะห่างระหว่างคำขอ "รวมทุก thread" ปรับเองตามที่เซิร์ฟรับได้
     -- สำเร็จ -> เร็วขึ้น / ถูกปฏิเสธ -> ช้าลง (Quick แค่ลดค่าต่ำสุดลง)
-    local minGap = quickOn and 0.12 or 0.4
-    local gap    = 0.5
+    local dly = math.max(tonumber(thrBox.Text) or 1, 0.05)   -- delay คงที่ ไม่ปรับเองแล้ว
+    local gap    = dly
     local failRun, bigOk, bigFail = 0, 0, 0
     local okType, lastGot, note = "-", 0, ""
     local alive = nT
@@ -297,6 +297,7 @@ goBtn.MouseButton1Click:Connect(function()
             task.wait(gap*(i-1))
             while running and token==my do
                 local name=cases[math.random(#cases)]
+                local okLast=false
                 local a=amt
                 local ok,res=pcall(function()
                     return OpenRemote:InvokeServer(name,a,flag)
@@ -315,9 +316,9 @@ goBtn.MouseButton1Click:Connect(function()
                         local got=a
                         if type(res)=="table" and #res>0 then got=#res end
                         okType=typeof(res); lastGot=got
-                        okn+=1; total+=got; failRun=0
+                        okn+=1; total+=got; failRun=0; okLast=true
                         if a>3 then bigOk+=1 end
-                        gap=math.max(gap*0.9, minGap)
+                        gap=dly
                     else
                         failRun+=1
                         if a>3 then
@@ -326,11 +327,12 @@ goBtn.MouseButton1Click:Connect(function()
                                 amt=3; note="\nเซิร์ฟไม่รับ >3 → ใช้ 3 แทน"
                             end
                         end
-                        gap=math.min(gap*1.3+0.05, 15)
+                        gap=dly
                     end
                 end
 
-                task.wait(gap*nT)
+                -- Quick ON: สำเร็จแล้วยิงต่อทันที / โดนปฏิเสธค่อยรอ delay
+                task.wait((okLast and quickOn) and 0.05 or gap)
 
                 if i==1 then
                     local per=total/math.max(os.clock()-t0,1)*60
@@ -339,8 +341,8 @@ goBtn.MouseButton1Click:Connect(function()
                         "ส่ง %d | ✓%d (%d%%) | ได้ %d\n%.0f/min | %dt | gap%.2f\n%s | ok:%s ได้×%d ขอ×%d%s",
                         sent,okn,rate,total,per,nT,gap,name,okType,lastGot,a,note)
                 end
-                if failRun>=20 then
-                    stLbl.Text=stLbl.Text.."\n⛔ โดนปฏิเสธรัว — ลด threads หรือปิด Quick"
+                if failRun>=40 then
+                    stLbl.Text=stLbl.Text.."\n⛔ โดนปฏิเสธรัว — เช็คเงิน หรือเพิ่ม delay"
                     running=false
                     break
                 end
