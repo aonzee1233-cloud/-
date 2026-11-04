@@ -257,11 +257,11 @@ pcall(function()
         if not dead and not running and self == OpenRemote
             and getnamecallmethod() == "InvokeServer"
             and not (checkcaller and checkcaller()) then
-            local n, a = ...
+            local n, a, f = ...
             if type(n) == "string" then
                 task.defer(function()
                     addCase(n, true); save()
-                    stLbl.Text = "จำกล่องแล้ว: "..n.." (เกมเปิดทีละ ×"..tostring(a)..")"
+                    stLbl.Text = "จำกล่องแล้ว: "..n.."\nเกมส่ง ×"..tostring(a)..", arg3="..tostring(f)
                 end)
             end
         end
@@ -326,7 +326,7 @@ goBtn.MouseButton1Click:Connect(function()
                                 amt=3; note="\nเซิร์ฟไม่รับ >3 → ใช้ 3 แทน"
                             end
                         end
-                        gap=math.min(gap*1.4+0.02, 3)
+                        gap=math.min(gap*1.3+0.05, 15)
                     end
                 end
 
@@ -336,8 +336,8 @@ goBtn.MouseButton1Click:Connect(function()
                     local per=total/math.max(os.clock()-t0,1)*60
                     local rate=math.floor(okn/math.max(sent,1)*100)
                     stLbl.Text=string.format(
-                        "ส่ง %d | ✓%d (%d%%) | ได้ %d\n%.0f/min | %dt | gap%.2f\nok:%s ได้×%d | ขอ×%d%s",
-                        sent,okn,rate,total,per,nT,gap,okType,lastGot,a,note)
+                        "ส่ง %d | ✓%d (%d%%) | ได้ %d\n%.0f/min | %dt | gap%.2f\n%s | ok:%s ได้×%d ขอ×%d%s",
+                        sent,okn,rate,total,per,nT,gap,name,okType,lastGot,a,note)
                 end
                 if failRun>=20 then
                     stLbl.Text=stLbl.Text.."\n⛔ โดนปฏิเสธรัว — ลด threads หรือปิด Quick"
