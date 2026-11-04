@@ -1,13 +1,14 @@
--- Case Opener v4  (Roblox / Luau executor)
+-- Case Opener v4.1  (Roblox / Luau executor)
+-- v4.1: ตัดระบบ "พัก" ออกทั้งหมด + แก้บั๊กอ่าน stock ผิด (กล่องไม่จำกัดถูกมองว่า "หมด" ทำให้สลับไปเปิดต่อไม่ได้)
 -- v4: แก้อาการ "รอกล่อง/รีสต็อก + พัก" เป็นพักๆ ทั้งที่เงินพอ
 --     * แยก "เซิร์ฟคูลดาวน์" ออกจาก "กล่องเสีย": ล้มเหลวใกล้ๆ หลังเปิดสำเร็จ = ปรับจังหวะ ไม่พักกล่อง ไม่เปลี่ยนชื่อ key
 --     * จังหวะเปิดปรับเอง (ห่างขั้นต่ำ) เรียนรู้ตามเซิร์ฟ/boost ความเร็วเปิด
 --     * ของ Limited เหลือน้อยแล้วโดนแย่ง -> ลองทีละ 1 + อ่าน stock ใหม่
 --     * Auto Limited ว่าง (หมด/พัก/รอรีสต็อก) -> เปิดกล่องไม่จำกัดสต็อกที่เลือกไว้แทน (ไม่นั่งรอเฉยๆ)
---     * พักกล่อง 10 วิ (เดิม 30) และโชว์เวลาที่เหลือ / อ่านราคากล่องที่ไม่มีคำว่า case ได้ถ้าเลือกไว้
+--     * อ่านราคากล่องที่ไม่มีคำว่า case ได้ถ้าเลือกไว้
 -- v3: Auto Limited = สุ่มเฉพาะ 12 กล่องในรายชื่อ LIMITED (แก้ได้ด้านล่าง) โดยอ่านราคา/stock จากหน้า Cases เอง (ไม่ต้องพิมพ์ชื่อ, รีสต็อกก็เจอเอง)
 --     เช็ค stock + เงินก่อนยิงทุกครั้ง -> กล่องหมดแล้วไม่ยิงต่อ (Robux ไม่เด้ง)
---     กล่องที่ล้มเหลวซ้ำจะถูกพักชั่วคราว / ล้มเหลวติดกันเยอะเกินจะหยุดเอง
+--     ล้มเหลวจริงติดกันเยอะเกินจะหยุดเองทั้งหมด (กัน Robux เด้ง)
 local RS          = game:GetService("ReplicatedStorage")
 local HttpService = game:GetService("HttpService")
 local lp          = game:GetService("Players").LocalPlayer
@@ -17,10 +18,8 @@ local DisplayOpen = RS.GameEvents.Cases.DisplayOpen
 local MAX_AMT    = 10               -- เพดานกล่องต่อครั้ง (ถ้าเซิร์ฟรับแค่ 3 สคริปต์จะถอยเป็น 3 เอง)
 local SAVE_FILE  = "CaseOpener.json"
 local SCAN_EVERY = 0.6              -- อ่าน UI ใหม่ทุกกี่วินาที
-local BLOCK_SECS = 10               -- พักกล่องที่ล้มเหลวซ้ำกี่วินาที (ถ้า stock เพิ่ม/รีสต็อก จะปลดเอง)
 local MAX_FAIL   = 8                -- ล้มเหลวจริงติดกันกี่ครั้งถึงหยุดทั้งหมด
 local COOL_MAX   = 12               -- ช่วงห่างระหว่างการเปิดสูงสุดที่ยอมให้เรียนรู้ (วินาที)
-local HARD_FAIL  = 10               -- กล่องที่เคยเปิดได้ แต่ล้มเหลวติดกันเท่านี้ (แม้ช่วงคูลดาวน์) -> พัก
 
 local running, token, dead = false, 0, false
 local sent, okn, total, t0 = 0, 0, 0, 0
@@ -98,8 +97,9 @@ local function scanUI()
             if t ~= "" then
                 local lo = t:lower()
                 local L = {o = o, t = t, l = lo, price = parsePrice(t)}
-                L.stock = tonumber(lo:match("stock%D*(%d+)"))
-                if L.stock == nil and lo:find("sold%s*out") then L.stock = 0 end
+                -- ต้องขึ้นต้นด้วย "stock" เท่านั้น (ป้าย "Restock in 00m 00s" ห้ามนับเป็น stock = 0)
+                L.stock = tonumber(lo:match("^stock%D*(%d+)"))
+                if L.stock == nil and lo:match("^sold%s*out") then L.stock = 0 end
                 lab[o] = L
                 list[#list + 1] = L
                 if L.stock ~= nil then stockLbls[#stockLbls + 1] = L end
@@ -162,7 +162,8 @@ local function scanUI()
                     local old = cards[nm]
                     if not old or (old.stock == nil and stock ~= nil) then
                         cards[nm] = {norm = nm, disp = info.name, stock = stock, price = info.price,
-                                     inst = cur.Name, nameObj = info.nameObj}
+                                     inst = cur.Name, nameObj = info.nameObj,
+                                     stockSrc = stock ~= nil and "group" or nil}
                     end
                     break
                 end
@@ -181,7 +182,7 @@ local function scanUI()
                 local dyC = (np.Y + ns.Y / 2) - (sp.Y + ss.Y / 2)
                 local overlap = sp.X < np.X + ns.X and np.X < sp.X + ss.X
                 if overlap and dyC > 0 and dyC < math.max(ss.Y * 3, 150) and dyC < bestD then
-                    bestD = dyC; c.stock = S.stock
+                    bestD = dyC; c.stock = S.stock; c.stockSrc = "pos"
                 end
             end
         end
@@ -253,7 +254,7 @@ local tb = Instance.new("Frame")
 tb.Size=UDim2.new(1,0,0,22); tb.BackgroundColor3=Color3.fromRGB(0,80,180); tb.BorderSizePixel=0; tb.Parent=frame
 local tl = Instance.new("TextLabel")
 tl.Size=UDim2.new(1,0,1,0); tl.BackgroundTransparency=1
-tl.Text="🎁 Case Opener v4"; tl.TextColor3=Color3.new(1,1,1); tl.TextSize=13; tl.Parent=tb
+tl.Text="🎁 Case Opener v4.1"; tl.TextColor3=Color3.new(1,1,1); tl.TextSize=13; tl.Parent=tb
 
 local function Btn(txt,y,col,xs,ws)
     local b=Instance.new("TextButton")
@@ -509,11 +510,11 @@ goBtn.MouseButton1Click:Connect(function()
     local dly = math.max(tonumber(thrBox.Text) or 1, 0.05)
     local failRun, bigOk, bigFail = 0, 0, 0
     local okType, lastGot, note = "-", 0, ""
-    local blocked, failN, cdN, tryIdx, estimate, probe = {}, {}, {}, {}, {}, {}
+    local failN, cdN, tryIdx, estimate, probe = {}, {}, {}, {}, {}
     local cards, bal, lastScan = {}, nil, 0
     local errCount = 0
     -- จังหวะเซิร์ฟ: cool = ช่วงห่างขั้นต่ำระหว่างการเปิดสำเร็จ 2 ครั้ง (เรียนรู้เอง ขึ้น/ลงตาม boost ความเร็วเปิด)
-    local cool, coolAtOk, lastOk = 0.3, 0.3, os.clock()
+    local cool, lastOk = 0.3, os.clock()
 
     local function step()
         -- 1) อ่านหน้า UI ใหม่ (stock/ราคา/เงิน) ทุก SCAN_EVERY วินาที
@@ -531,22 +532,10 @@ goBtn.MouseButton1Click:Connect(function()
             lastScan = os.clock()
         end
 
-        -- 2) สร้างรายการกล่องที่เปิดได้ตอนนี้ (มี stock, เงินพอ, ไม่ถูกพัก)
-        local pool, st = {}, {total = 0, empty = 0, blocked = 0, poor = 0}
-        local now = os.clock()
+        -- 2) สร้างรายการกล่องที่เปิดได้ตอนนี้ (มี stock, เงินพอ)
+        local pool, st = {}, {total = 0, empty = 0, poor = 0}
         local function consider(e)
             st.total += 1
-            local b = blocked[e.norm]
-            if b then
-                if now >= b.untilT or (e.stock and b.stockAt and e.stock > b.stockAt) then
-                    blocked[e.norm] = nil; failN[e.norm] = 0; cdN[e.norm] = 0
-                else
-                    st.blocked += 1
-                    local rem = b.untilT - now
-                    if not st.rem or rem < st.rem then st.rem = rem end
-                    return
-                end
-            end
             if e.stock and e.stock <= 0 then st.empty += 1; return end
             local a = amt
             if probe[e.norm] then a = 1 end
@@ -562,7 +551,10 @@ goBtn.MouseButton1Click:Connect(function()
                 local nm = norm(n)
                 if not (onlyUnlimited and limitedSet[nm]) then
                     local c = cards[nm]
-                    consider({norm = nm, disp = n, key = n, stock = c and c.stock,
+                    local stk = c and c.stock
+                    -- กล่องไม่จำกัดไม่มี stock: เชื่อ stock เฉพาะที่อ่านจากในการ์ดของมันเอง ไม่เอาป้ายที่เดาจากตำแหน่ง
+                    if stk ~= nil and not limitedSet[nm] and c.stockSrc ~= "group" then stk = nil end
+                    consider({norm = nm, disp = n, key = n, stock = stk,
                               price = c and c.price, inst = c and c.inst, fb = onlyUnlimited})
                 end
             end
@@ -573,7 +565,7 @@ goBtn.MouseButton1Click:Connect(function()
                 local c = cards[nm]
                 if c and c.stock ~= nil then consider(c) end
             end
-            -- Limited ว่าง (หมด/พัก/เงินไม่พอ/รอรีสต็อก) -> เปิดกล่องไม่จำกัดสต็อกที่เลือกไว้แทน
+            -- Limited ว่าง (หมด/เงินไม่พอ/รอรีสต็อก) -> เปิดกล่องไม่จำกัดสต็อกที่เลือกไว้แทน
             if #pool == 0 then considerSelected(true) end
         else
             considerSelected(false)
@@ -587,10 +579,8 @@ goBtn.MouseButton1Click:Connect(function()
                 stLbl.Text = "ไม่เจอการ์ดกล่อง Limited ใน UI\nเปิดหน้า Cases ค้างไว้ แล้วกด Scan ดูจำนวน"
             else
                 stLbl.Text = string.format(
-                    "รอกล่อง/รีสต็อก...\nUI %d | หมด %d | พัก %d%s | เงินไม่พอ %d\n💰%s | ส่ง %d ✓%d ได้ %d",
-                    st.total, st.empty, st.blocked,
-                    st.rem and string.format(" (อีก %ds)", math.ceil(st.rem)) or "",
-                    st.poor, balTxt, sent, okn, total)
+                    "รอกล่อง/รีสต็อก...\nUI %d | หมด %d | เงินไม่พอ %d\n💰%s | ส่ง %d ✓%d ได้ %d",
+                    st.total, st.empty, st.poor, balTxt, sent, okn, total)
             end
             task.wait(0.5)
             return
@@ -628,15 +618,16 @@ goBtn.MouseButton1Click:Connect(function()
             -- เปิดผ่าน -> ลองถี่ขึ้นทีละนิด (ถ้าเซิร์ฟเร็วขึ้น เช่นตอนมี boost) ถ้าชนอีกก็ถอยเอง
             cool = cool * 0.95
             if cool < 0.1 then cool = 0 end
-            coolAtOk, lastOk = cool, t1
+            lastOk = t1
             nextWait = quickOn and math.max(0.05, cool) or math.max(dly, cool)
         else
             local since = t1 - lastOk
             local proven = learned[e.norm] ~= nil
             local inWin = cool < COOL_MAX and since < math.max(cool * 1.5, 4)
-            if inWin and (proven or (cdN[e.norm] or 0) < 1) then
+            local cdLimit = proven and 4 or 1   -- กี่ครั้งติดกันที่ยอมนับว่าเป็นคูลดาวน์ (เกินนี้ = ล้มเหลวจริง)
+            if inWin and (cdN[e.norm] or 0) < cdLimit then
                 -- ล้มเหลวใกล้ๆ หลังเปิดสำเร็จ = เซิร์ฟยังคูลดาวน์ ไม่ใช่กล่องเสีย
-                -- -> ไม่พักกล่อง ไม่เปลี่ยนชื่อ key แค่ขยายช่วงห่างแล้วรอ
+                -- -> ไม่เปลี่ยนชื่อ key แค่ขยายช่วงห่างแล้วรอ
                 cdN[e.norm] = (cdN[e.norm] or 0) + 1
                 if e.stock and e.stock <= 3 and cdN[e.norm] == 1 then
                     probe[e.norm] = true; nextWait = 0.3
@@ -646,24 +637,13 @@ goBtn.MouseButton1Click:Connect(function()
                     nextWait = math.max(0.25, lastOk + cool - t1)
                     note = string.format("\nเซิร์ฟคูลดาวน์ → ห่างเป็น %.1fs", cool)
                 end
-                if cdN[e.norm] >= HARD_FAIL then
-                    blocked[e.norm] = {untilT = t1 + BLOCK_SECS, stockAt = e.stock}
-                    cool = coolAtOk
-                    note = "\nพัก "..e.disp.." "..BLOCK_SECS.."s (ล้มเหลวติดกัน)"
-                end
             else
                 -- ล้มเหลวนอกช่วงคูลดาวน์ = ล้มเหลวจริง (ชื่อ key ผิด / stock หมด / เงินไม่พอ ฯลฯ)
                 failRun += 1
                 failN[e.norm] = (failN[e.norm] or 0) + 1
                 if a > 1 then probe[e.norm] = true end
                 if not learned[e.norm] then tryIdx[e.norm] = (tryIdx[e.norm] or 0) + 1 end
-                local limit = learned[e.norm] and 2 or (#cl + 1)
-                if failN[e.norm] >= limit then
-                    blocked[e.norm] = {untilT = t1 + BLOCK_SECS, stockAt = e.stock}
-                    note = "\nพัก "..e.disp.." "..BLOCK_SECS.."s (ล้มเหลวซ้ำ)"
-                else
-                    note = "\nล้มเหลว: "..(ok and "false/nil" or tostring(res))
-                end
+                note = "\nล้มเหลว: "..(ok and "false/nil" or tostring(res))
             end
             if a > 3 then
                 bigFail += 1
@@ -678,8 +658,8 @@ goBtn.MouseButton1Click:Connect(function()
         local per = total / math.max(os.clock() - t0, 1) * 60
         local rate = math.floor(okn / math.max(sent, 1) * 100)
         stLbl.Text = string.format(
-            "ส่ง %d | ✓%d (%d%%) | ได้ %d\n%.0f/min | UI%d พร้อม%d หมด%d พัก%d\n💰%s | ห่าง %.1fs | ok:%s ×%d\n%s%s ขอ×%d%s",
-            sent, okn, rate, total, per, st.total, #pool, st.empty, st.blocked,
+            "ส่ง %d | ✓%d (%d%%) | ได้ %d\n%.0f/min | UI%d พร้อม%d หมด%d\n💰%s | ห่าง %.1fs | ok:%s ×%d\n%s%s ขอ×%d%s",
+            sent, okn, rate, total, per, st.total, #pool, st.empty,
             balTxt, cool, okType, lastGot, e.fb and "[สำรอง] " or "", e.disp, a, note)
 
         if failRun >= MAX_FAIL then
