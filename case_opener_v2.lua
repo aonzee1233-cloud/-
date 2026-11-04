@@ -289,7 +289,7 @@ goBtn.MouseButton1Click:Connect(function()
     local minGap = quickOn and 0.12 or 0.4
     local gap    = 0.5
     local failRun, bigOk, bigFail = 0, 0, 0
-    local lastType, note = "-", ""
+    local okType, lastGot, note = "-", 0, ""
     local alive = nT
 
     for i=1,nT do
@@ -309,10 +309,13 @@ goBtn.MouseButton1Click:Connect(function()
                     break
                 else
                     sent+=1
-                    lastType=typeof(res)
                     if hideOn then hideAnim() end
                     if res ~= nil and res ~= false then
-                        okn+=1; total+=a; failRun=0
+                        -- ถ้าเซิร์ฟส่งลิสต์ของกลับมา นับจากของจริง ไม่งั้นใช้ตามที่ขอ
+                        local got=a
+                        if type(res)=="table" and #res>0 then got=#res end
+                        okType=typeof(res); lastGot=got
+                        okn+=1; total+=got; failRun=0
                         if a>3 then bigOk+=1 end
                         gap=math.max(gap*0.9, minGap)
                     else
@@ -333,8 +336,8 @@ goBtn.MouseButton1Click:Connect(function()
                     local per=total/math.max(os.clock()-t0,1)*60
                     local rate=math.floor(okn/math.max(sent,1)*100)
                     stLbl.Text=string.format(
-                        "ส่ง %d | ✓%d (%d%%) | รวม %d\n%.0f/min | %dt | gap%.2f | res:%s\n%s×%d%s",
-                        sent,okn,rate,total,per,nT,gap,lastType,name,a,note)
+                        "ส่ง %d | ✓%d (%d%%) | ได้ %d\n%.0f/min | %dt | gap%.2f\nok:%s ได้×%d | ขอ×%d%s",
+                        sent,okn,rate,total,per,nT,gap,okType,lastGot,a,note)
                 end
                 if failRun>=20 then
                     stLbl.Text=stLbl.Text.."\n⛔ โดนปฏิเสธรัว — ลด threads หรือปิด Quick"
