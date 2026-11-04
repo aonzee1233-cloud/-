@@ -1,5 +1,5 @@
 -- Case Opener v3  (Roblox / Luau executor)
--- v3: Auto-All  = อ่านกล่อง/ราคา/stock จากหน้า Cases เอง (ไม่ต้องพิมพ์ชื่อ, Limited รีสต็อกก็เจอเอง)
+-- v3: Auto Limited = สุ่มเฉพาะ 12 กล่องในรายชื่อ LIMITED (แก้ได้ด้านล่าง) โดยอ่านราคา/stock จากหน้า Cases เอง (ไม่ต้องพิมพ์ชื่อ, รีสต็อกก็เจอเอง)
 --     เช็ค stock + เงินก่อนยิงทุกครั้ง -> กล่องหมดแล้วไม่ยิงต่อ (Robux ไม่เด้ง)
 --     กล่องที่ล้มเหลวซ้ำจะถูกพักชั่วคราว / ล้มเหลวติดกันเยอะเกินจะหยุดเอง
 local RS          = game:GetService("ReplicatedStorage")
@@ -44,6 +44,15 @@ gui.Parent = (gethui and gethui()) or lp:WaitForChild("PlayerGui")
 
 -- ===== ตัวช่วยอ่านข้อความ/ราคา =====
 local function norm(s) return (tostring(s):lower():gsub("[^%w]", "")) end
+
+-- กล่อง Limited ที่ Auto จะสุ่ม (ตามหน้า Limited Cases) — ถ้าเกมเพิ่ม/เปลี่ยนกล่อง แก้รายชื่อตรงนี้
+local LIMITED = {
+    "Common Case", "Serpent Case", "Candy Case", "Epic Case",
+    "Polar Case", "Arcade Case", "Legendary Case", "Great Waves Case",
+    "Royal Case", "Mythic Case", "Secret Case", "Godly Case",
+}
+local limitedSet = {}
+for _, n in ipairs(LIMITED) do limitedSet[norm(n)] = true end
 
 local function clean(s)
     s = tostring(s or ""):gsub("<[^>]+>", "")
@@ -294,8 +303,8 @@ scanBtn.MouseButton1Click:Connect(function()
         end
         local u=0
         local okU, cards = pcall(scanUI)
-        if okU and type(cards)=="table" then for _ in pairs(cards) do u+=1 end end
-        scanBtn.Text=string.format("✓ โมดูล %d | การ์ดใน UI %d", n, u)
+        if okU and type(cards)=="table" then for nm in pairs(cards) do if limitedSet[nm] then u+=1 end end end
+        scanBtn.Text=string.format("✓ โมดูล %d | Limited ใน UI %d/%d", n, u, #LIMITED)
         save()
     end)
 end)
@@ -315,7 +324,7 @@ local skipBtn =Btn("Skip: OFF", 196,nil,0,0.5)
 local hideBtn =Btn("Hide: OFF", 196,nil,0.5,0.5)
 local quickBtn=Btn("Quick: OFF",224,nil,0,0.5)
 local flagBtn =Btn("Flag: false",224,nil,0.5,0.5)
-local autoBtn =Btn("Auto-All: ON",252)
+local autoBtn =Btn("Auto Limited: ON",252)
 local goBtn   =Btn("▶ Start",280,Color3.fromRGB(0,130,55))
 goBtn.Size=UDim2.new(1,-8,0,28)
 
@@ -331,7 +340,7 @@ local function paint()
     hideBtn.Text  = hideOn  and "Hide: ON"  or "Hide: OFF";  hideBtn.BackgroundColor3  = hideOn  and ON_C or OFF_C
     quickBtn.Text = quickOn and "Quick: ON" or "Quick: OFF"; quickBtn.BackgroundColor3 = quickOn and ON_C or OFF_C
     flagBtn.Text  = "Flag: "..tostring(flag);                flagBtn.BackgroundColor3  = flag    and ON_C or OFF_C
-    autoBtn.Text  = autoOn and "🎲 Auto-All: ON (สุ่มทุกกล่อง)" or "Auto-All: OFF (ใช้กล่องที่เลือก)"
+    autoBtn.Text  = autoOn and "🎲 Auto Limited: ON" or "Auto Limited: OFF (ใช้กล่องที่เลือก)"
     autoBtn.TextSize = 11
     autoBtn.BackgroundColor3 = autoOn and ON_C or OFF_C
 end
@@ -426,7 +435,7 @@ goBtn.MouseButton1Click:Connect(function()
     if not autoOn then
         local any=false
         for _ in pairs(selectedCases) do any=true; break end
-        if not any then stLbl.Text="⚠ แตะชื่อกล่องเพื่อเลือกก่อน (หรือเปิด Auto-All)"; return end
+        if not any then stLbl.Text="⚠ แตะชื่อกล่องเพื่อเลือกก่อน (หรือเปิด Auto Limited)"; return end
     end
     save()
     running=true; token+=1; local my=token
@@ -479,7 +488,11 @@ goBtn.MouseButton1Click:Connect(function()
             pool[#pool + 1] = e
         end
         if autoOn then
-            for _, c in pairs(cards) do consider(c) end
+            -- เฉพาะ 12 กล่องใน LIMITED และต้องอ่าน stock ได้ (ไม่รู้ stock = ไม่ยิง กัน Robux เด้ง)
+            for nm in pairs(limitedSet) do
+                local c = cards[nm]
+                if c and c.stock ~= nil then consider(c) end
+            end
         else
             for n in pairs(selectedCases) do
                 local nm = norm(n)
@@ -495,7 +508,7 @@ goBtn.MouseButton1Click:Connect(function()
         if #pool == 0 then
             prevOk = false
             if autoOn and st.total == 0 then
-                stLbl.Text = "ไม่เจอการ์ดกล่องใน UI\nเปิดหน้า Cases ค้างไว้ แล้วกด Scan ดูจำนวนการ์ด"
+                stLbl.Text = "ไม่เจอการ์ดกล่อง Limited ใน UI\nเปิดหน้า Cases ค้างไว้ แล้วกด Scan ดูจำนวน"
             else
                 stLbl.Text = string.format(
                     "รอกล่อง/รีสต็อก...\nUI %d | หมด %d | พัก %d | เงินไม่พอ %d\n💰%s | ส่ง %d ✓%d ได้ %d",
